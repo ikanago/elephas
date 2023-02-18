@@ -1,0 +1,14 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "tsc && node dist/index.js",
+        "fmt": "prettier --write '**/*.{js,jsx,ts,tsx,css,json,md}'",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "ikanago",
+    "license": "MIT"
+}

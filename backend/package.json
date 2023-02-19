@@ -10,5 +10,10 @@
     },
     "keywords": [],
     "author": "ikanago",
-    "license": "MIT"
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^18.14.0",
+        "dotenv": "^16.0.3",
+        "fastify": "^4.13.0"
+    }
 }

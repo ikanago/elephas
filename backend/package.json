@@ -12,6 +12,7 @@
     "author": "ikanago",
     "license": "MIT",
     "devDependencies": {
+        "@fastify/accepts": "^4.1.0",
         "@types/node": "^18.14.0",
         "dotenv": "^16.0.3",
         "fastify": "^4.13.0"

@@ -1,12 +1,57 @@
 import Fastify, { FastifyInstance } from "fastify";
 import { config } from "./config";
 import * as dotenv from "dotenv";
+import crypto from "crypto";
 
 const server: FastifyInstance = Fastify({});
+server.register(require("@fastify/accepts"));
+server.addContentTypeParser(
+    "application/activity+json",
+    { parseAs: "string" },
+    server.getDefaultJsonParser("ignore", "ignore")
+);
+server.addContentTypeParser(
+    "application/ld+json",
+    { parseAs: "string" },
+    server.getDefaultJsonParser("ignore", "ignore")
+);
 
 dotenv.config();
 
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 const PUBLIC_KEY = process.env.PUBLIC_KEY || "";
+
+const signHeaders = (payload: any, inbox: string) => {
+    const now = new Date().toUTCString();
+    const digest = crypto
+        .createHash("sha256")
+        .update(JSON.stringify(payload))
+        .digest("base64");
+
+    const signedString = [
+        `(request-target): post ${new URL(inbox).pathname}`,
+        `host: ${new URL(inbox).hostname}`,
+        `date: ${now}`,
+        `digest: SHA-256=${digest}`,
+    ].join("\n");
+    const signer = crypto.createSign("RSA-SHA256").update(signedString);
+    const signature = signer.sign(PRIVATE_KEY, "base64");
+
+    const headers = {
+        Host: new URL(inbox).hostname,
+        Date: now,
+        Digest: `SHA-256=${digest}`,
+        Signature: [
+            `keyId="https://ikanago.dev/users/test"`,
+            `algorithm="rsa-sha256"`,
+            `headers="(request-target) host date digest"`,
+            `signature="${signature}"`,
+        ].join(","),
+        // Accept: "application/activity+json",
+        "Content-Type": "application/activity+json",
+    };
+    return headers;
+};
 
 server.get("/ping", async (request, reply) => {
     return { pong: "it worked!" };
@@ -40,6 +85,49 @@ server.get<{
             publicKeyPem: PUBLIC_KEY,
         },
     });
+});
+
+server.post<{
+    Params: {
+        name: string;
+    };
+    Body: {
+        id: string;
+        type: string;
+        actor: string;
+        object: string;
+    };
+}>("/users/:name/inbox", async (request, reply) => {
+    server.log.debug(request);
+    const body = request.body;
+    if (body.type == "Follow") {
+        const payload = {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            id: `https://${config.domain}/users/test/accept/1`,
+            type: "Accept",
+            actor: body.object,
+            object: {
+                id: body.id,
+                type: body.type,
+                actor: body.actor,
+                object: body.object,
+            },
+        };
+        console.log(payload);
+        const targetInbox = `${request.body.actor}/inbox`;
+        const headers = signHeaders(payload, targetInbox);
+        reply.headers(headers);
+
+        try {
+            fetch(targetInbox, {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: headers,
+            });
+        } catch(err) {
+            server.log.error(err);
+        }
+    }
 });
 
 server.get<{

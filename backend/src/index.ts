@@ -1,93 +1,102 @@
 import Fastify, { FastifyInstance } from "fastify";
-import { config } from "./config";
 import * as dotenv from "dotenv";
-import crypto from "crypto";
+import { PrismaClient } from "@prisma/client";
+import { generateKeyPair, signHeaders } from "./util";
 
-const server: FastifyInstance = Fastify({});
-server.register(require("@fastify/accepts"));
-server.addContentTypeParser(
+const fastify: FastifyInstance = Fastify({});
+fastify.register(require("@fastify/accepts"));
+fastify.addContentTypeParser(
     "application/activity+json",
     { parseAs: "string" },
-    server.getDefaultJsonParser("ignore", "ignore")
+    fastify.getDefaultJsonParser("ignore", "ignore")
 );
-server.addContentTypeParser(
+fastify.addContentTypeParser(
     "application/ld+json",
     { parseAs: "string" },
-    server.getDefaultJsonParser("ignore", "ignore")
+    fastify.getDefaultJsonParser("ignore", "ignore")
 );
 
 dotenv.config();
+const HOST_NAME = process.env.HOST_NAME || "";
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
-const PUBLIC_KEY = process.env.PUBLIC_KEY || "";
-
-const signHeaders = (payload: any, inbox: string) => {
-    const now = new Date().toUTCString();
-    const digest = crypto
-        .createHash("sha256")
-        .update(JSON.stringify(payload))
-        .digest("base64");
-
-    const signedString = [
-        `(request-target): post ${new URL(inbox).pathname}`,
-        `host: ${new URL(inbox).hostname}`,
-        `date: ${now}`,
-        `digest: SHA-256=${digest}`,
-    ].join("\n");
-    const signer = crypto.createSign("RSA-SHA256").update(signedString);
-    const signature = signer.sign(PRIVATE_KEY, "base64");
-
-    const headers = {
-        Host: new URL(inbox).hostname,
-        Date: now,
-        Digest: `SHA-256=${digest}`,
-        Signature: [
-            `keyId="https://ikanago.dev/users/test"`,
-            `algorithm="rsa-sha256"`,
-            `headers="(request-target) host date digest"`,
-            `signature="${signature}"`,
-        ].join(","),
-        // Accept: "application/activity+json",
-        "Content-Type": "application/activity+json",
-    };
-    return headers;
-};
-
-server.get("/ping", async (request, reply) => {
+fastify.get("/ping", async () => {
     return { pong: "it worked!" };
 });
 
-server.get<{
+fastify.post<{
+    Body: {
+        email: string;
+        name: string;
+    };
+}>("/register", async (request, reply) => {
+    // TODO: test creating a new user with the email already used fails.
+    const user = await prisma.user.create({
+        data: {
+            email: request.body.email,
+            name: request.body.name,
+        },
+    });
+
+    const { publicKey, privateKey } = await generateKeyPair();
+    await prisma.userKeyPair.create({
+        data: {
+            userId: user.id,
+            publicKey: publicKey,
+            privateKey: privateKey,
+        },
+    });
+
+    reply.send({ message: `Successfully created user ${user.name}` });
+});
+
+fastify.get<{
     Params: {
         name: string;
     };
 }>("/users/:name", async (request, reply) => {
-    const username = request.params.name;
+    const name = request.params.name;
+    const user = await prisma.user.findFirst({ where: { name: name } });
+    if (!user) {
+        reply.code(404).send("Not found");
+        return;
+    }
+
+    const keyPair = await prisma.userKeyPair.findUnique({
+        where: { userId: user.id },
+    });
+    if (!keyPair) {
+        fastify.log.error(
+            `User whose ID is ${user.id} does not have a key pair`
+        );
+        reply.code(500).send("Internal server error");
+        return;
+    }
+
     reply.send({
         "@context": [
             "https://www.w3.org/ns/activitystreams",
             "https://w3id.org/security/v1",
         ],
         type: "Person",
-        id: `https://${config.domain}/users/${username}`,
-        inbox: `https://${config.domain}/users/${username}/inbox`,
-        preferredUsername: username,
-        name: username,
+        id: `https://${HOST_NAME}/users/${name}`,
+        inbox: `https://${HOST_NAME}/users/${name}/inbox`,
+        preferredUsername: name,
+        name: name,
         icon: {
             type: "Image",
             url: "https://blog.ikanago.dev/_next/image?url=%2Fblog_icon.png&w=828&q=75",
             name: "",
         },
         publicKey: {
-            id: `https://${config.domain}/users/${username}#main-key`,
+            id: `https://${HOST_NAME}/users/${name}#main-key`,
             type: "Key",
-            owner: `https://${config.domain}/users/${username}`,
-            publicKeyPem: PUBLIC_KEY,
+            owner: `https://${HOST_NAME}/users/${name}`,
+            publicKeyPem: keyPair.publicKey,
         },
     });
 });
 
-server.post<{
+fastify.post<{
     Params: {
         name: string;
     };
@@ -98,12 +107,21 @@ server.post<{
         object: string;
     };
 }>("/users/:name/inbox", async (request, reply) => {
-    server.log.debug(request);
+    fastify.log.debug(request);
     const body = request.body;
+
+    const user = await prisma.user.findFirst({
+        where: { name: request.params.name },
+    });
+    if (!user) {
+        reply.code(404).send("The user does not exist");
+        return;
+    }
+
     if (body.type == "Follow") {
         const payload = {
             "@context": "https://www.w3.org/ns/activitystreams",
-            id: `https://${config.domain}/users/test/accept/1`,
+            id: `https://${HOST_NAME}/users/test/accept/1`,
             type: "Accept",
             actor: body.object,
             object: {
@@ -113,10 +131,20 @@ server.post<{
                 object: body.object,
             },
         };
-        console.log(payload);
+        // TODO: assuming remote inbox URL.
         const targetInbox = `${request.body.actor}/inbox`;
-        const headers = signHeaders(payload, targetInbox);
-        reply.headers(headers);
+
+        const keyPair = await prisma.userKeyPair.findUnique({
+            where: { userId: user.id },
+        });
+        if (!keyPair) {
+            fastify.log.error(
+                `User whose ID is ${user.id} does not have a key pair`
+            );
+            reply.code(500).send("Internal server error");
+            return;
+        }
+        const headers = signHeaders(payload, targetInbox, keyPair.privateKey);
 
         try {
             fetch(targetInbox, {
@@ -124,13 +152,13 @@ server.post<{
                 body: JSON.stringify(payload),
                 headers: headers,
             });
-        } catch(err) {
-            server.log.error(err);
+        } catch (err) {
+            fastify.log.error(err);
         }
     }
 });
 
-server.get<{
+fastify.get<{
     Querystring: {
         resource: string;
     };
@@ -139,32 +167,43 @@ server.get<{
         .replace("acct:", "")
         .replace(/\@[^@]+$/, "");
     reply.send({
-        subject: `acct:${username}@${config.domain}`,
+        subject: `acct:${username}@${HOST_NAME}`,
         links: [
             {
                 rel: "self",
                 type: "application/activity+json",
-                href: `https://${config.domain}/users/${username}`,
+                href: `https://${HOST_NAME}/users/${username}`,
             },
         ],
     });
 });
 
-server.get("/.well-known/host-meta", async (request, reply) => {
+fastify.get("/.well-known/host-meta", async (request, reply) => {
     reply.header("Content-Type", "application/xrd+xml; charset=utf-8");
     reply.send(
         `<?xml version="1.0" encoding="UTF-8"?>
         <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
-            <Link rel="lrdd" type="application/xrd+xml" template="https://${config.domain}/.well-known/webfinger?resource={uri}"/>
+            <Link rel="lrdd" type="application/xrd+xml" template="https://${HOST_NAME}/.well-known/webfinger?resource={uri}"/>
         </XRD>`
     );
 });
 
+const prisma = new PrismaClient();
+
 const start = async () => {
     try {
-        await server.listen({ port: 3000 });
+        await fastify.listen({ port: 3000 });
     } catch (err) {
-        server.log.error(err);
+        fastify.log.error(err);
     }
 };
-start();
+
+start()
+    .then(async () => {
+        await prisma.$disconnect();
+    })
+    .catch(async e => {
+        console.error(e);
+        await prisma.$disconnect();
+        process.exit(1);
+    });

@@ -1,2 +1,5 @@
+.env
+db
 dist
 node_modules
+*.pem

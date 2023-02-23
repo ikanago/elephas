@@ -33,14 +33,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          override: true
-          toolchain: stable
+      - run: rustup component add rustfmt clippy
 
       - name: Cache dependencies
-        uses: Swatinem/rust-cache@v1
+        uses: Swatinem/rust-cache@v2
 
       - name: Check format
         run: cargo fmt -- --check
@@ -52,6 +48,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features -- -D warnings
+
+      - name: Setup Postgresql
+        run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
 
       - name: Run tests
         run: cargo test --verbose

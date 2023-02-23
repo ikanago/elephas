@@ -25,7 +25,7 @@ jobs:
         ports:
           - 5432:5432
     env:
-      DATABASE_URL: 'postgresql://ikanago:password@localhost:5432/test?schema=public'
+      DATABASE_URL: 'postgresql://ikanago:password@localhost:5432/test'
     defaults:
       run:
         working-directory: backend

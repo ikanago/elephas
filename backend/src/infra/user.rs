@@ -24,8 +24,7 @@ impl UserRepository for PgPool {
             name
         )
         .execute(self)
-        .await
-        .unwrap();
+        .await?;
         Ok(())
     }
 
@@ -38,8 +37,7 @@ impl UserRepository for PgPool {
             name
         )
         .fetch_one(self)
-        .await
-        .unwrap();
+        .await?;
         Ok(user)
     }
 }

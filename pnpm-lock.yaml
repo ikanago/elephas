@@ -4,24 +4,24 @@ importers:
 
   .:
     specifiers:
-      prettier: ^2.8.4
-      typescript: ^4.9.5
+      prettier: 2.8.4
+      typescript: 4.9.5
     devDependencies:
       prettier: 2.8.4
       typescript: 4.9.5
 
   backend:
     specifiers:
-      '@fastify/accepts': ^4.1.0
-      '@prisma/client': ^4.10.1
-      '@types/node': ^18.14.0
-      dotenv: ^16.0.3
-      fastify: ^4.13.0
-      prisma: ^4.10.1
+      '@fastify/accepts': 4.1.0
+      '@prisma/client': 4.10.1
+      '@types/node': 18.14.1
+      dotenv: 16.0.3
+      fastify: 4.13.0
+      prisma: 4.10.1
     devDependencies:
       '@fastify/accepts': 4.1.0
       '@prisma/client': 4.10.1_prisma@4.10.1
-      '@types/node': 18.14.0
+      '@types/node': 18.14.1
       dotenv: 16.0.3
       fastify: 4.13.0
       prisma: 4.10.1
@@ -80,8 +80,8 @@ packages:
     requiresBuild: true
     dev: true
 
-  /@types/node/18.14.0:
-    resolution: {integrity: sha512-5EWrvLmglK+imbCJY0+INViFWUHg1AHel1sq4ZVSfdcNqGy9Edv3UB9IIzzg+xPaUcAgZYcfVs2fBcwDeZzU0A==}
+  /@types/node/18.14.1:
+    resolution: {integrity: sha512-QH+37Qds3E0eDlReeboBxfHbX9omAcBCXEzswCu6jySP642jiM3cYSIkU/REqwhCUqXdonHFuBfJDiAJxMNhaQ==}
     dev: true
 
   /abort-controller/3.0.0:

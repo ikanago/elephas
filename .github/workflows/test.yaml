@@ -41,6 +41,9 @@ jobs:
       - name: Check format
         run: cargo fmt -- --check
 
+      - name: Setup Postgresql
+        run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
+
       - name: Build
         run: cargo build --locked --verbose
 
@@ -48,9 +51,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features -- -D warnings
-
-      - name: Setup Postgresql
-        run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
 
       - name: Run tests
         run: cargo test --verbose

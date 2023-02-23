@@ -11,39 +11,8 @@ on:
 env:
   CARGO_INCREMENTAL: 0
 
-defaults:
-  run:
-    working-directory: backend
-
 jobs:
-  check:
-    runs-on: 'ubuntu-22.04'
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          override: true
-          toolchain: stable
-          components: rustfmt, clippy
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Check format
-        run: cargo fmt -- --check
-
-      - name: Build
-        run: cargo build --locked --verbose
-
-      - run: rustup component add clippy
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features -- -D warnings
-
-  unittest:
+  backend_test:
     runs-on: 'ubuntu-22.04'
     services:
       postgres:
@@ -52,8 +21,14 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_USER: ikanago
           POSTGRES_PASSWORD: password
+          POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+        ports:
+          - 5432:5432
     env:
       DATABASE_URL: 'postgresql://ikanago:password@localhost:5432/test?schema=public'
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
       - uses: actions/checkout@v3
@@ -67,8 +42,16 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v1
 
+      - name: Check format
+        run: cargo fmt -- --check
+
       - name: Build
         run: cargo build --locked --verbose
+
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features -- -D warnings
 
       - name: Run tests
         run: cargo test --verbose

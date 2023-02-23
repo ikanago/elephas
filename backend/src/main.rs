@@ -1,9 +1,10 @@
-use crate::model::User;
+use crate::infra::UserRepository;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
 use serde_json::json;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
+mod infra;
 mod model;
 
 #[get("/ping")]
@@ -20,37 +21,13 @@ struct Regestration {
 #[get("/users/{name}")]
 async fn user(pool: web::Data<PgPool>, param: web::Path<String>) -> impl Responder {
     let name = param.into_inner();
-    let user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT * FROM users WHERE name = $1
-        "#,
-        name
-    )
-    .fetch_one(&**pool)
-    .await
-    .unwrap();
-
+    let user = pool.get_user_by_name(&name).await.unwrap();
     format!("{:?}", user)
 }
 
 #[post("/register")]
 async fn register(pool: web::Data<PgPool>, body: web::Json<Regestration>) -> impl Responder {
-    sqlx::query!(
-        r#"
-        INSERT INTO users ("email", "name")
-        VALUES (
-            $1,
-            $2
-        )
-        "#,
-        body.email,
-        body.name
-    )
-    .execute(&**pool)
-    .await
-    .unwrap();
-
+    pool.create_user(&body.email, &body.name).await.unwrap();
     format!("Successfully created user {}", body.name)
 }
 
@@ -66,7 +43,7 @@ async fn webfinger(
 ) -> impl Responder {
     let email = query.resource.replace("acct:", "");
     // TODO: assume valid email address.
-    let user_name = email.split("@").next().unwrap();
+    let user_name = email.split('@').next().unwrap();
     let host_name = &**host_name;
     // TODO: check if the user exists
     web::Json(json!({

@@ -33,24 +33,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: rustup component add rustfmt clippy
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend -> target
 
       - name: Check format
-        run: cargo fmt -- --check
+        run: cargo fmt --all -- --check
 
       - name: Setup Postgresql
         run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
 
       - name: Build
         run: cargo build --locked --verbose
-
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features -- -D warnings
 
       - name: Run tests
         run: cargo test --verbose

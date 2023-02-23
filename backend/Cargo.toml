@@ -9,8 +9,13 @@ edition = "2021"
 actix-web = "4.3.0"
 anyhow = "1.0.69"
 async-trait = "0.1.64"
-dockertest = "0.3.1"
+base64 = "0.21.0"
+chrono = { version = "0.4.23", default-features = false, features = ["clock", "std"] }
 dotenvy = "0.15.6"
+rand = "0.8.5"
+reqwest = { version = "0.11.14", features = ["json"] }
+rsa = { version = "0.8.1", features = ["sha2"] }
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.93"
+sha256 = "1.1.2"
 sqlx = { version = "0.6.2", features = ["postgres", "runtime-actix-rustls"] }

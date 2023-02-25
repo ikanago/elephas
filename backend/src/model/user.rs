@@ -4,27 +4,29 @@ use sqlx::{FromRow, PgPool};
 
 #[derive(Clone, Debug, Serialize, Deserialize, FromRow)]
 pub struct User {
-    pub id: i32,
+    pub id: String,
     pub name: String,
 }
 
 #[async_trait]
 pub trait UserRepository {
-    async fn create_user(&self, name: &str) -> crate::Result<()>;
+    async fn save_user(&self, user: User) -> crate::Result<()>;
     async fn get_user_by_name(&self, name: &str) -> crate::Result<User>;
 }
 
 #[async_trait]
 impl UserRepository for PgPool {
-    async fn create_user(&self, name: &str) -> crate::Result<()> {
+    async fn save_user(&self, user: User) -> crate::Result<()> {
         sqlx::query!(
             r#"
-            INSERT INTO users ("name")
+            INSERT INTO users ("id", "name")
             VALUES (
-                $1
+                $1,
+                $2
             )
             "#,
-            name
+            user.id,
+            user.name
         )
         .execute(self)
         .await?;
@@ -51,10 +53,14 @@ mod tests {
 
     #[sqlx::test]
     async fn get_registered_user(pool: PgPool) {
-        let name = "ikanago";
-        pool.create_user(name).await.unwrap();
+        let user = User {
+            id: "xxxx".to_string(),
+            name: "ikanago".to_string(),
+        };
+        pool.save_user(user).await.unwrap();
 
         let user = pool.get_user_by_name("ikanago").await.unwrap();
-        assert_eq!(name, user.name);
+        assert_eq!(user.id, "xxxx");
+        assert_eq!(user.name, "ikanago");
     }
 }

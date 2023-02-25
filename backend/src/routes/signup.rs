@@ -1,10 +1,13 @@
 use crate::{
     error::ServiceError,
-    model::{key_pair::generate_key_pair, KeyPairRepository, UserRepository},
+    model::{key_pair::generate_key_pair, KeyPair, KeyPairRepository, User, UserRepository},
 };
 use actix_web::{post, web, Responder};
+use rand::Rng;
 use serde::Deserialize;
 use sqlx::PgPool;
+
+const ID_LEN: usize = 16;
 
 #[derive(Deserialize)]
 pub struct Regestration {
@@ -24,13 +27,29 @@ async fn signup_service(pool: &PgPool, name: &str) -> crate::Result<impl Respond
         return Err(ServiceError::NameAlreadyTaken);
     }
 
-    pool.create_user(&name).await?;
+    let user = User {
+        id: generate_id(ID_LEN),
+        name: name.to_string(),
+    };
+    pool.save_user(user).await?;
     let user = pool.get_user_by_name(&name).await?;
+
     let (private_key, public_key) = generate_key_pair().unwrap();
-    pool.create_key_pair(user.id, &private_key, &public_key)
-        .await
-        .unwrap();
+    let key_pair = KeyPair {
+        user_id: user.id.clone(),
+        private_key,
+        public_key,
+    };
+    pool.save_key_pair(key_pair).await.unwrap();
     Ok(format!("Successfully created user {}", name))
+}
+
+fn generate_id(len: usize) -> String {
+    rand::thread_rng()
+        .sample_iter(rand::distributions::Alphanumeric)
+        .take(len)
+        .map(char::from)
+        .collect()
 }
 
 #[cfg(test)]

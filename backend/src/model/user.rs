@@ -5,28 +5,25 @@ use sqlx::{FromRow, PgPool};
 #[derive(Clone, Debug, Serialize, Deserialize, FromRow)]
 pub struct User {
     pub id: i32,
-    pub email: String,
     pub name: String,
 }
 
 #[async_trait]
 pub trait UserRepository {
-    async fn create_user(&self, email: &str, name: &str) -> anyhow::Result<()>;
-    async fn get_user_by_name(&self, name: &str) -> anyhow::Result<User>;
+    async fn create_user(&self, name: &str) -> crate::Result<()>;
+    async fn get_user_by_name(&self, name: &str) -> crate::Result<User>;
 }
 
 #[async_trait]
 impl UserRepository for PgPool {
-    async fn create_user(&self, email: &str, name: &str) -> anyhow::Result<()> {
+    async fn create_user(&self, name: &str) -> crate::Result<()> {
         sqlx::query!(
             r#"
-            INSERT INTO users ("email", "name")
+            INSERT INTO users ("name")
             VALUES (
-                $1,
-                $2
+                $1
             )
             "#,
-            email,
             name
         )
         .execute(self)
@@ -34,7 +31,7 @@ impl UserRepository for PgPool {
         Ok(())
     }
 
-    async fn get_user_by_name(&self, name: &str) -> anyhow::Result<User> {
+    async fn get_user_by_name(&self, name: &str) -> crate::Result<User> {
         let user = sqlx::query_as!(
             User,
             r#"
@@ -56,10 +53,9 @@ mod tests {
     async fn get_registered_user(pool: PgPool) {
         let email = "ikanago@example.com";
         let name = "ikanago";
-        pool.create_user(email, name).await.unwrap();
+        pool.create_user(name).await.unwrap();
 
         let user = pool.get_user_by_name("ikanago").await.unwrap();
-        assert_eq!(email, user.email);
         assert_eq!(name, user.name);
     }
 }

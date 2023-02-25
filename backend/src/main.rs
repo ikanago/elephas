@@ -2,8 +2,11 @@ use actix_web::{web, App, HttpServer};
 use routes::routing;
 use sqlx::postgres::PgPoolOptions;
 
+mod error;
 mod model;
 mod routes;
+
+pub type Result<T> = std::result::Result<T, error::ServiceError>;
 
 #[actix_web::main]
 async fn main() {

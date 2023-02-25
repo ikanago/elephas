@@ -1,5 +1,5 @@
 use crate::model::{key_pair::sign_headers, KeyPairRepository, UserRepository};
-use actix_web::{post, web, Responder, HttpResponse};
+use actix_web::{post, web, HttpResponse, Responder};
 use serde::Deserialize;
 use serde_json::json;
 use sqlx::PgPool;
@@ -23,7 +23,12 @@ async fn inbox(
     inbox_service(pool.as_ref(), host_name.as_ref(), name, body.into_inner()).await
 }
 
-async fn inbox_service(pool: &PgPool, host_name: &str, name: String, body: InboxBody) -> impl Responder {
+async fn inbox_service(
+    pool: &PgPool,
+    host_name: &str,
+    name: String,
+    body: InboxBody,
+) -> impl Responder {
     let user = pool.get_user_by_name(&name).await.unwrap();
 
     if body.r#type == "Follow" {

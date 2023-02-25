@@ -1,26 +1,43 @@
-use crate::model::{key_pair::generate_key_pair, KeyPairRepository, UserRepository};
+use crate::{model::{key_pair::generate_key_pair, KeyPairRepository, UserRepository}, error::ServiceError};
 use actix_web::{post, web, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;
 
 #[derive(Deserialize)]
 pub struct Regestration {
-    email: String,
     name: String,
 }
 
 #[post("/signup")]
-pub async fn signup(pool: web::Data<PgPool>, body: web::Json<Regestration>) -> impl Responder {
-    // TODO: test creating a new user with the email already used fails.
-    signup_service(pool.as_ref(), &body.email, &body.name).await
+pub async fn signup(
+    pool: web::Data<PgPool>,
+    body: web::Json<Regestration>,
+) -> crate::Result<impl Responder> {
+    signup_service(pool.as_ref(), &body.name).await
 }
 
-async fn signup_service(pool: &PgPool, email: &str, name: &str) -> impl Responder {
-    pool.create_user(&email, &name).await.unwrap();
-    let user = pool.get_user_by_name(&name).await.unwrap();
+async fn signup_service(pool: &PgPool, name: &str) -> crate::Result<impl Responder> {
+    if pool.get_user_by_name(&name).await.is_ok() {
+        return Err(ServiceError::NameAlreadyTaken);
+    }
+
+    pool.create_user(&name).await?;
+    let user = pool.get_user_by_name(&name).await?;
     let (private_key, public_key) = generate_key_pair().unwrap();
     pool.create_key_pair(user.id, &private_key, &public_key)
         .await
         .unwrap();
-    format!("Successfully created user {}", name)
+    Ok(format!("Successfully created user {}", name))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[sqlx::test]
+    async fn error_already_used_name(pool: PgPool) {
+        let name = "ikanago";
+        signup_service(&pool, name).await.unwrap();
+        assert!(signup_service(&pool, name).await.is_err());
+    }
 }

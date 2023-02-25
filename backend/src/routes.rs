@@ -1,10 +1,10 @@
 use actix_web::{web, Scope};
 
+mod host_meta;
 mod inbox;
 mod signup;
 mod user_info;
 mod webfinger;
-mod host_meta;
 
 pub fn routing() -> Scope {
     web::scope("/")

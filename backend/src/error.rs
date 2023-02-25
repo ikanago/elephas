@@ -1,20 +1,29 @@
-use actix_web::{http::header, HttpResponse, ResponseError, body::MessageBody};
+use actix_web::{body::MessageBody, http::header, HttpResponse, ResponseError};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ServiceError {
     #[error("The user name is already used.")]
     NameAlreadyTaken,
+    #[error("Invalid ActivityPub request: {0}")]
+    InvalidActivityPubRequest(String),
 
     #[error("Query error: {0}")]
     QueryError(#[from] sqlx::Error),
+    #[error("Key error: {0}")]
+    KeyError(#[from] rsa::errors::Error),
+    #[error("Failed to send request: {0}")]
+    RequestError(#[from] reqwest::Error),
 }
 
 impl ResponseError for ServiceError {
     fn status_code(&self) -> reqwest::StatusCode {
         match self {
             ServiceError::NameAlreadyTaken => reqwest::StatusCode::BAD_REQUEST,
+            ServiceError::InvalidActivityPubRequest(_) => reqwest::StatusCode::BAD_REQUEST,
             ServiceError::QueryError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
+            ServiceError::KeyError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
+            ServiceError::RequestError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

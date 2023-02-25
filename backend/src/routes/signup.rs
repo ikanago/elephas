@@ -1,4 +1,7 @@
-use crate::{model::{key_pair::generate_key_pair, KeyPairRepository, UserRepository}, error::ServiceError};
+use crate::{
+    error::ServiceError,
+    model::{key_pair::generate_key_pair, KeyPairRepository, UserRepository},
+};
 use actix_web::{post, web, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;

@@ -51,7 +51,6 @@ mod tests {
 
     #[sqlx::test]
     async fn get_registered_user(pool: PgPool) {
-        let email = "ikanago@example.com";
         let name = "ikanago";
         pool.create_user(name).await.unwrap();
 

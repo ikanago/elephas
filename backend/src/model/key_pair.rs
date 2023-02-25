@@ -16,6 +16,8 @@ use rsa::{
 };
 use sqlx::PgPool;
 
+use crate::error::ServiceError;
+
 #[derive(Clone, Debug)]
 pub struct KeyPair {
     pub user_id: i32,
@@ -30,8 +32,8 @@ pub trait KeyPairRepository {
         user_id: i32,
         private_key: &str,
         public_key: &str,
-    ) -> anyhow::Result<()>;
-    async fn get_key_pair_by_user_id(&self, user_id: i32) -> anyhow::Result<KeyPair>;
+    ) -> crate::Result<()>;
+    async fn get_key_pair_by_user_id(&self, user_id: i32) -> crate::Result<KeyPair>;
 }
 
 #[async_trait]
@@ -41,7 +43,7 @@ impl KeyPairRepository for PgPool {
         user_id: i32,
         private_key: &str,
         public_key: &str,
-    ) -> anyhow::Result<()> {
+    ) -> crate::Result<()> {
         sqlx::query!(
             r#"
             INSERT INTO user_key_pair ("user_id", "private_key", "public_key")
@@ -60,7 +62,7 @@ impl KeyPairRepository for PgPool {
         Ok(())
     }
 
-    async fn get_key_pair_by_user_id(&self, user_id: i32) -> anyhow::Result<KeyPair> {
+    async fn get_key_pair_by_user_id(&self, user_id: i32) -> crate::Result<KeyPair> {
         let key_pair = sqlx::query_as!(
             KeyPair,
             r#"
@@ -76,11 +78,14 @@ impl KeyPairRepository for PgPool {
 
 const BITS: usize = 2048;
 
-pub fn generate_key_pair() -> anyhow::Result<(String, String)> {
-    let private_key = RsaPrivateKey::new(&mut thread_rng(), BITS)?;
+pub fn generate_key_pair() -> crate::Result<(String, String)> {
+    let private_key = RsaPrivateKey::new(&mut thread_rng(), BITS).expect("private key is created successfully; error is generated when nprimes < 2, but nprimes is 2.");
     let public_key = RsaPublicKey::from(&private_key);
-    let private_key_pem = private_key.to_pkcs8_pem(LineEnding::LF)?.to_string();
-    let public_key_pem = public_key.to_public_key_pem(LineEnding::LF)?;
+    let private_key_pem = private_key
+        .to_pkcs8_pem(LineEnding::LF)
+        .unwrap()
+        .to_string();
+    let public_key_pem = public_key.to_public_key_pem(LineEnding::LF).unwrap();
     Ok((private_key_pem, public_key_pem))
 }
 
@@ -88,8 +93,9 @@ pub fn sign_headers(
     payload: &serde_json::Value,
     url: &str,
     private_key: &str,
-) -> anyhow::Result<HeaderMap> {
-    let url = Url::parse(url)?;
+) -> crate::Result<HeaderMap> {
+    let url = Url::parse(url)
+        .map_err(|_| ServiceError::InvalidActivityPubRequest(format!("Invalid URL: {}", url)))?;
     let now = Local::now().to_rfc2822();
     let digest = sha256::digest(payload.to_string());
     let digest = general_purpose::STANDARD.encode(digest);
@@ -102,7 +108,8 @@ pub fn sign_headers(
         format!("digest: SHA-256={}", digest),
     ]
     .join("\n");
-    let private_key = RsaPrivateKey::from_pkcs8_pem(&private_key)?;
+    let private_key =
+        RsaPrivateKey::from_pkcs8_pem(&private_key).expect("Only valid private key must be stored");
     let signing_key = SigningKey::<Sha256>::new_with_prefix(private_key);
     let signature = signing_key.sign(signed_string.as_bytes());
     let signature = general_purpose::STANDARD.encode(signature);

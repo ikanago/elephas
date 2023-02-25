@@ -28,8 +28,8 @@ async fn inbox_service(
     host_name: &str,
     name: String,
     body: InboxBody,
-) -> impl Responder {
-    let user = pool.get_user_by_name(&name).await.unwrap();
+) -> crate::Result<impl Responder> {
+    let user = pool.get_user_by_name(&name).await?;
 
     if body.r#type == "Follow" {
         let payload = json!({
@@ -47,8 +47,8 @@ async fn inbox_service(
         // TODO: assuming remote inbox URL.
         let target_inbox = format!("{}/inbox", body.actor);
 
-        let key_pair = pool.get_key_pair_by_user_id(user.id).await.unwrap();
-        let headers = sign_headers(&payload, &target_inbox, &key_pair.private_key).unwrap();
+        let key_pair = pool.get_key_pair_by_user_id(user.id).await?;
+        let headers = sign_headers(&payload, &target_inbox, &key_pair.private_key)?;
 
         let client = reqwest::Client::new();
         client
@@ -59,5 +59,5 @@ async fn inbox_service(
             .await
             .unwrap();
     }
-    HttpResponse::Ok()
+    Ok(HttpResponse::Ok())
 }

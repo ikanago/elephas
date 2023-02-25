@@ -6,6 +6,7 @@ use sqlx::{FromRow, PgPool};
 pub struct User {
     pub id: String,
     pub name: String,
+    pub password_hash: String,
 }
 
 #[async_trait]
@@ -19,14 +20,16 @@ impl UserRepository for PgPool {
     async fn save_user(&self, user: User) -> crate::Result<()> {
         sqlx::query!(
             r#"
-            INSERT INTO users ("id", "name")
+            INSERT INTO users ("id", "name", "password_hash")
             VALUES (
                 $1,
-                $2
+                $2,
+                $3
             )
             "#,
             user.id,
-            user.name
+            user.name,
+            user.password_hash
         )
         .execute(self)
         .await?;
@@ -56,11 +59,13 @@ mod tests {
         let user = User {
             id: "xxxx".to_string(),
             name: "ikanago".to_string(),
+            password_hash: "password_hashed".to_string(),
         };
         pool.save_user(user).await.unwrap();
 
         let user = pool.get_user_by_name("ikanago").await.unwrap();
         assert_eq!(user.id, "xxxx");
         assert_eq!(user.name, "ikanago");
+        assert_eq!(user.password_hash, "password_hashed");
     }
 }

@@ -5,6 +5,8 @@ use thiserror::Error;
 pub enum ServiceError {
     #[error("The user name is already used.")]
     NameAlreadyTaken,
+    #[error("Unauthorized")]
+    Unauthorized,
     #[error("Invalid ActivityPub request: {0}")]
     InvalidActivityPubRequest(String),
 
@@ -22,6 +24,7 @@ impl ResponseError for ServiceError {
     fn status_code(&self) -> reqwest::StatusCode {
         match self {
             ServiceError::NameAlreadyTaken => reqwest::StatusCode::BAD_REQUEST,
+            ServiceError::Unauthorized => reqwest::StatusCode::UNAUTHORIZED,
             ServiceError::InvalidActivityPubRequest(_) => reqwest::StatusCode::BAD_REQUEST,
             ServiceError::InternalServerError => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
             ServiceError::QueryError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,

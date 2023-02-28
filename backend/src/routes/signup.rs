@@ -3,7 +3,7 @@ use crate::{
     model::{key_pair::generate_key_pair, KeyPair, KeyPairRepository, User, UserRepository},
 };
 use actix_session::Session;
-use actix_web::{post, web, Responder};
+use actix_web::{post, web, HttpResponse, Responder};
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand::Rng;
 use rand_core::OsRng;
@@ -55,7 +55,7 @@ pub async fn signup_service(
     session
         .insert("user_id", user.id)
         .expect("user ID is must be serializable");
-    Ok(format!("Successfully created user {}", name))
+    Ok(HttpResponse::Ok())
 }
 
 fn generate_id(len: usize) -> String {

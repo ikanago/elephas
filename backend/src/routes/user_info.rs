@@ -3,9 +3,8 @@ use crate::{
     model::{KeyPairRepository, UserRepository},
 };
 use actix_session::Session;
-use actix_web::{get, http::header::Accept, web, HttpResponse};
-use reqwest::header::LOCATION;
-use serde_json::json;
+use actix_web::{get, http::header::Accept, web, Responder};
+use serde_json::{json, Value};
 use sqlx::PgPool;
 
 #[get("/users/{name}")]
@@ -15,7 +14,7 @@ async fn user_info(
     session: Session,
     accept: web::Header<Accept>,
     param: web::Path<String>,
-) -> crate::Result<HttpResponse> {
+) -> crate::Result<impl Responder> {
     user_info_service(
         pool.as_ref(),
         host_name.as_ref(),
@@ -32,29 +31,21 @@ async fn user_info_service(
     session: Session,
     accept: String,
     name: &str,
-) -> crate::Result<HttpResponse> {
+) -> crate::Result<web::Json<Value>> {
     if accept.contains("application/ld+json") {
         return user_info_activity_json(pool, host_name, name).await;
     }
 
-    let stored_user_id = if let Some(user_id) = session
+    let stored_user_id = session
         .get::<String>("user_id")
         .map_err(|_| ServiceError::InternalServerError)?
-    {
-        user_id
-    } else {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, "/login"))
-            .finish());
-    };
+        .ok_or(ServiceError::Unauthorized)?;
     let user = pool.get_user_by_id(&stored_user_id).await.unwrap();
     if name != user.name {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, "/login"))
-            .finish());
+        return Err(ServiceError::Unauthorized);
     }
 
-    Ok(HttpResponse::Ok().json(json!({
+    Ok(web::Json(json!({
         "name": name,
     })))
 }
@@ -63,11 +54,11 @@ async fn user_info_activity_json(
     pool: &PgPool,
     host_name: &str,
     name: &str,
-) -> crate::Result<HttpResponse> {
+) -> crate::Result<web::Json<Value>> {
     let user = pool.get_user_by_name(&name).await?;
     let key_pair = pool.get_key_pair_by_user_id(user.id).await?;
 
-    Ok(HttpResponse::Ok().json(json!({
+    Ok(web::Json(json!({
         "@context": [
             "https://www.w3.org/ns/activitystreams",
             "https://w3id.org/security/v1",
@@ -98,9 +89,7 @@ mod tests {
     use super::*;
 
     use actix_session::SessionExt;
-    use actix_web::{body::to_bytes, test::TestRequest};
-    use reqwest::StatusCode;
-    use serde_json::Value;
+    use actix_web::test::TestRequest;
 
     #[sqlx::test]
     async fn get_user_info_activity_json(pool: PgPool) {
@@ -131,10 +120,7 @@ mod tests {
         .unwrap();
 
         // assert
-        assert!(res.status().is_success());
-        let body = to_bytes(res.into_body()).await.unwrap();
-        let body = std::str::from_utf8(&body).unwrap();
-        let body: Value = serde_json::from_str(&body).unwrap();
+        let body = res.0;
         assert_eq!("Person", body["type"]);
         assert_eq!(name, body["name"]);
     }
@@ -157,11 +143,10 @@ mod tests {
         session.insert("user_id", first_user_id).unwrap();
 
         // act
-        let res = user_info_service(&pool, "example.com", session, "*/*".to_string(), "mallory")
-            .await
-            .unwrap();
+        let res =
+            user_info_service(&pool, "example.com", session, "*/*".to_string(), "mallory").await;
 
         // assert
-        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        assert!(res.is_err());
     }
 }

@@ -3,7 +3,7 @@ use crate::{
     model::{KeyPairRepository, UserRepository},
 };
 use actix_session::Session;
-use actix_web::{get, web, HttpResponse};
+use actix_web::{get, http::header::Accept, web, HttpResponse};
 use reqwest::header::LOCATION;
 use serde_json::json;
 use sqlx::PgPool;
@@ -13,13 +13,15 @@ async fn user_info(
     pool: web::Data<PgPool>,
     host_name: web::Data<String>,
     session: Session,
+    accept: web::Header<Accept>,
     param: web::Path<String>,
 ) -> crate::Result<HttpResponse> {
     user_info_service(
         pool.as_ref(),
         host_name.as_ref(),
         session,
-        param.into_inner(),
+        accept.to_string(),
+        param.as_ref(),
     )
     .await
 }
@@ -28,8 +30,13 @@ async fn user_info_service(
     pool: &PgPool,
     host_name: &str,
     session: Session,
-    name: String,
+    accept: String,
+    name: &str,
 ) -> crate::Result<HttpResponse> {
+    if accept.contains("application/ld+json") {
+        return user_info_activity_json(pool, host_name, name).await;
+    }
+
     let stored_user_id = if let Some(user_id) = session
         .get::<String>("user_id")
         .map_err(|_| ServiceError::InternalServerError)?
@@ -47,7 +54,18 @@ async fn user_info_service(
             .finish());
     }
 
-    let key_pair = pool.get_key_pair_by_user_id(user.id).await.unwrap();
+    Ok(HttpResponse::Ok().json(json!({
+        "name": name,
+    })))
+}
+
+async fn user_info_activity_json(
+    pool: &PgPool,
+    host_name: &str,
+    name: &str,
+) -> crate::Result<HttpResponse> {
+    let user = pool.get_user_by_name(&name).await?;
+    let key_pair = pool.get_key_pair_by_user_id(user.id).await?;
 
     Ok(HttpResponse::Ok().json(json!({
         "@context": [
@@ -80,8 +98,46 @@ mod tests {
     use super::*;
 
     use actix_session::SessionExt;
-    use actix_web::test::TestRequest;
+    use actix_web::{body::to_bytes, test::TestRequest};
     use reqwest::StatusCode;
+    use serde_json::Value;
+
+    #[sqlx::test]
+    async fn get_user_info_activity_json(pool: PgPool) {
+        // arrange
+        let req = TestRequest::default().to_srv_request();
+        let session = req.get_session();
+        let name = "ikanago".to_string();
+        let regstration = Regestration {
+            name: name.clone(),
+            password: "password".to_string(),
+        };
+        signup_service(&pool, regstration, session.clone())
+            .await
+            .unwrap();
+        let user_id = pool.get_user_by_name(&name).await.unwrap().id;
+
+        session.insert("user_id", user_id).unwrap();
+
+        // act
+        let res = user_info_service(
+            &pool,
+            "example.com",
+            session,
+            "application/ld+json".to_string(),
+            &name,
+        )
+        .await
+        .unwrap();
+
+        // assert
+        assert!(res.status().is_success());
+        let body = to_bytes(res.into_body()).await.unwrap();
+        let body = std::str::from_utf8(&body).unwrap();
+        let body: Value = serde_json::from_str(&body).unwrap();
+        assert_eq!("Person", body["type"]);
+        assert_eq!(name, body["name"]);
+    }
 
     #[sqlx::test]
     async fn error_other_users_session(pool: PgPool) {
@@ -101,7 +157,7 @@ mod tests {
         session.insert("user_id", first_user_id).unwrap();
 
         // act
-        let res = user_info_service(&pool, "example.com", session, "mallory".to_string())
+        let res = user_info_service(&pool, "example.com", session, "*/*".to_string(), "mallory")
             .await
             .unwrap();
 

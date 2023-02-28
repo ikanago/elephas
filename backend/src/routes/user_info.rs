@@ -15,6 +15,21 @@ async fn user_info(
     session: Session,
     param: web::Path<String>,
 ) -> crate::Result<HttpResponse> {
+    user_info_service(
+        pool.as_ref(),
+        host_name.as_ref(),
+        session,
+        param.into_inner(),
+    )
+    .await
+}
+
+async fn user_info_service(
+    pool: &PgPool,
+    host_name: &str,
+    session: Session,
+    name: String,
+) -> crate::Result<HttpResponse> {
     let stored_user_id = if let Some(user_id) = session
         .get::<String>("user_id")
         .map_err(|_| ServiceError::InternalServerError)?
@@ -26,7 +41,6 @@ async fn user_info(
             .finish());
     };
     let user = pool.get_user_by_id(&stored_user_id).await.unwrap();
-    let name = param.into_inner();
     if name != user.name {
         return Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/login"))
@@ -41,8 +55,8 @@ async fn user_info(
             "https://w3id.org/security/v1",
         ],
         "type": "Person",
-        "id": format!("https://{}/users/{}", &**host_name, name),
-        "inbox": format!("https://{}/users/{}/inbox", &**host_name, name),
+        "id": format!("https://{}/users/{}", host_name, name),
+        "inbox": format!("https://{}/users/{}/inbox", host_name, name),
         "preferredUsername": name,
         "name": name,
         "icon": {
@@ -51,10 +65,47 @@ async fn user_info(
             "name": "",
         },
         "publicKey": {
-            "id": format!("https://{}/users/{}#main-key", &**host_name, name),
+            "id": format!("https://{}/users/{}#main-key", host_name, name),
             "type": "Key",
-            "owner": format!("https://{}/users/{}", &**host_name, name),
+            "owner": format!("https://{}/users/{}", host_name, name),
             "publicKeyPem": key_pair.public_key,
         },
     })))
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::routes::signup::{signup_service, Regestration};
+
+    use super::*;
+
+    use actix_session::SessionExt;
+    use actix_web::test::TestRequest;
+    use reqwest::StatusCode;
+
+    #[sqlx::test]
+    async fn error_other_users_session(pool: PgPool) {
+        // arrange
+        let req = TestRequest::default().to_srv_request();
+        let session = req.get_session();
+        let first_user_name = "ikanago".to_string();
+        let regstration = Regestration {
+            name: first_user_name.clone(),
+            password: "password".to_string(),
+        };
+        signup_service(&pool, regstration, session.clone())
+            .await
+            .unwrap();
+        let first_user_id = pool.get_user_by_name(&first_user_name).await.unwrap().id;
+
+        session.insert("user_id", first_user_id).unwrap();
+
+        // act
+        let res = user_info_service(&pool, "example.com", session, "mallory".to_string())
+            .await
+            .unwrap();
+
+        // assert
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+    }
 }

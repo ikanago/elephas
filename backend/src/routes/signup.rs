@@ -14,8 +14,8 @@ const ID_LEN: usize = 16;
 
 #[derive(Clone, Deserialize)]
 pub struct Regestration {
-    name: String,
-    password: String,
+    pub name: String,
+    pub password: String,
 }
 
 #[post("/signup")]
@@ -27,7 +27,7 @@ pub async fn signup(
     signup_service(pool.as_ref(), body.into_inner(), session).await
 }
 
-async fn signup_service(
+pub async fn signup_service(
     pool: &PgPool,
     Regestration { name, password }: Regestration,
     session: Session,
@@ -52,7 +52,9 @@ async fn signup_service(
     };
     pool.save_key_pair(key_pair).await.unwrap();
 
-    session.insert("user_id", user.id).expect("user ID is must be serializable");
+    session
+        .insert("user_id", user.id)
+        .expect("user ID is must be serializable");
     Ok(format!("Successfully created user {}", name))
 }
 
@@ -76,13 +78,25 @@ fn hash_password(password: &str) -> String {
 mod tests {
     use super::*;
 
+    use actix_session::SessionExt;
+    use actix_web::test::TestRequest;
+
     #[sqlx::test]
     async fn error_already_used_name(pool: PgPool) {
+        // arrange
+        let req = TestRequest::default().to_srv_request();
+        let session = req.get_session();
         let regstration = Regestration {
             name: "ikanago".to_string(),
             password: "password".to_string(),
         };
-        signup_service(&pool, regstration.clone()).await.unwrap();
-        assert!(signup_service(&pool, regstration).await.is_err());
+
+        // act
+        signup_service(&pool, regstration.clone(), session.clone())
+            .await
+            .unwrap();
+
+        // assert
+        assert!(signup_service(&pool, regstration, session).await.is_err());
     }
 }

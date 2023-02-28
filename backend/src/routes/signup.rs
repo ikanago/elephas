@@ -2,6 +2,7 @@ use crate::{
     error::ServiceError,
     model::{key_pair::generate_key_pair, KeyPair, KeyPairRepository, User, UserRepository},
 };
+use actix_session::Session;
 use actix_web::{post, web, Responder};
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand::Rng;
@@ -21,13 +22,15 @@ pub struct Regestration {
 pub async fn signup(
     pool: web::Data<PgPool>,
     body: web::Json<Regestration>,
+    session: Session,
 ) -> crate::Result<impl Responder> {
-    signup_service(pool.as_ref(), body.into_inner()).await
+    signup_service(pool.as_ref(), body.into_inner(), session).await
 }
 
 async fn signup_service(
     pool: &PgPool,
     Regestration { name, password }: Regestration,
+    session: Session,
 ) -> crate::Result<impl Responder> {
     if pool.get_user_by_name(&name).await.is_ok() {
         return Err(ServiceError::NameAlreadyTaken);
@@ -48,6 +51,8 @@ async fn signup_service(
         public_key,
     };
     pool.save_key_pair(key_pair).await.unwrap();
+
+    session.insert("user_id", user.id).expect("user ID is must be serializable");
     Ok(format!("Successfully created user {}", name))
 }
 

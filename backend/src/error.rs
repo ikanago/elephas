@@ -8,6 +8,8 @@ pub enum ServiceError {
     #[error("Invalid ActivityPub request: {0}")]
     InvalidActivityPubRequest(String),
 
+    #[error("Internal server error")]
+    InternalServerError,
     #[error("Query error: {0}")]
     QueryError(#[from] sqlx::Error),
     #[error("Key error: {0}")]
@@ -21,6 +23,7 @@ impl ResponseError for ServiceError {
         match self {
             ServiceError::NameAlreadyTaken => reqwest::StatusCode::BAD_REQUEST,
             ServiceError::InvalidActivityPubRequest(_) => reqwest::StatusCode::BAD_REQUEST,
+            ServiceError::InternalServerError => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
             ServiceError::QueryError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
             ServiceError::KeyError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
             ServiceError::RequestError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,

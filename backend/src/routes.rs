@@ -7,7 +7,7 @@ mod user_info;
 mod webfinger;
 
 pub fn routing() -> Scope {
-    web::scope("/")
+    web::scope("")
         .service(self::signup::signup)
         .service(self::user_info::user_info)
         .service(self::inbox::inbox)

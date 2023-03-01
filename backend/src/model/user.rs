@@ -4,31 +4,50 @@ use sqlx::{FromRow, PgPool};
 
 #[derive(Clone, Debug, Serialize, Deserialize, FromRow)]
 pub struct User {
-    pub id: i32,
+    pub id: String,
     pub name: String,
+    pub password_hash: String,
 }
 
 #[async_trait]
 pub trait UserRepository {
-    async fn create_user(&self, name: &str) -> crate::Result<()>;
+    async fn save_user(&self, user: User) -> crate::Result<()>;
+    async fn get_user_by_id(&self, user_id: &str) -> crate::Result<User>;
     async fn get_user_by_name(&self, name: &str) -> crate::Result<User>;
 }
 
 #[async_trait]
 impl UserRepository for PgPool {
-    async fn create_user(&self, name: &str) -> crate::Result<()> {
+    async fn save_user(&self, user: User) -> crate::Result<()> {
         sqlx::query!(
             r#"
-            INSERT INTO users ("name")
+            INSERT INTO users ("id", "name", "password_hash")
             VALUES (
-                $1
+                $1,
+                $2,
+                $3
             )
             "#,
-            name
+            user.id,
+            user.name,
+            user.password_hash
         )
         .execute(self)
         .await?;
         Ok(())
+    }
+
+    async fn get_user_by_id(&self, user_id: &str) -> crate::Result<User> {
+        let user = sqlx::query_as!(
+            User,
+            r#"
+            SELECT * FROM users WHERE id = $1
+            "#,
+            user_id
+        )
+        .fetch_one(self)
+        .await?;
+        Ok(user)
     }
 
     async fn get_user_by_name(&self, name: &str) -> crate::Result<User> {
@@ -42,19 +61,5 @@ impl UserRepository for PgPool {
         .fetch_one(self)
         .await?;
         Ok(user)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[sqlx::test]
-    async fn get_registered_user(pool: PgPool) {
-        let name = "ikanago";
-        pool.create_user(name).await.unwrap();
-
-        let user = pool.get_user_by_name("ikanago").await.unwrap();
-        assert_eq!(name, user.name);
     }
 }

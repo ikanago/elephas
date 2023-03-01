@@ -7,7 +7,11 @@ pub enum ServiceError {
     NameAlreadyTaken,
     #[error("Invalid ActivityPub request: {0}")]
     InvalidActivityPubRequest(String),
+    #[error("Unauthorized")]
+    Unauthorized,
 
+    #[error("Internal server error")]
+    InternalServerError,
     #[error("Query error: {0}")]
     QueryError(#[from] sqlx::Error),
     #[error("Key error: {0}")]
@@ -19,11 +23,14 @@ pub enum ServiceError {
 impl ResponseError for ServiceError {
     fn status_code(&self) -> reqwest::StatusCode {
         match self {
-            ServiceError::NameAlreadyTaken => reqwest::StatusCode::BAD_REQUEST,
-            ServiceError::InvalidActivityPubRequest(_) => reqwest::StatusCode::BAD_REQUEST,
-            ServiceError::QueryError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
-            ServiceError::KeyError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
-            ServiceError::RequestError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
+            ServiceError::NameAlreadyTaken | ServiceError::InvalidActivityPubRequest(_) => {
+                reqwest::StatusCode::BAD_REQUEST
+            }
+            ServiceError::Unauthorized => reqwest::StatusCode::UNAUTHORIZED,
+            ServiceError::InternalServerError
+            | ServiceError::QueryError(_)
+            | ServiceError::KeyError(_)
+            | ServiceError::RequestError(_) => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

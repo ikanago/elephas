@@ -20,30 +20,20 @@ use crate::error::ServiceError;
 
 #[derive(Clone, Debug)]
 pub struct KeyPair {
-    pub user_id: i32,
+    pub user_id: String,
     pub private_key: String,
     pub public_key: String,
 }
 
 #[async_trait]
 pub trait KeyPairRepository {
-    async fn create_key_pair(
-        &self,
-        user_id: i32,
-        private_key: &str,
-        public_key: &str,
-    ) -> crate::Result<()>;
-    async fn get_key_pair_by_user_id(&self, user_id: i32) -> crate::Result<KeyPair>;
+    async fn save_key_pair(&self, key_pair: KeyPair) -> crate::Result<()>;
+    async fn get_key_pair_by_user_id(&self, user_id: String) -> crate::Result<KeyPair>;
 }
 
 #[async_trait]
 impl KeyPairRepository for PgPool {
-    async fn create_key_pair(
-        &self,
-        user_id: i32,
-        private_key: &str,
-        public_key: &str,
-    ) -> crate::Result<()> {
+    async fn save_key_pair(&self, key_pair: KeyPair) -> crate::Result<()> {
         sqlx::query!(
             r#"
             INSERT INTO user_key_pair ("user_id", "private_key", "public_key")
@@ -53,16 +43,16 @@ impl KeyPairRepository for PgPool {
                 $3
             )
         "#,
-            user_id,
-            private_key,
-            public_key
+            key_pair.user_id,
+            key_pair.private_key,
+            key_pair.public_key
         )
         .execute(self)
         .await?;
         Ok(())
     }
 
-    async fn get_key_pair_by_user_id(&self, user_id: i32) -> crate::Result<KeyPair> {
+    async fn get_key_pair_by_user_id(&self, user_id: String) -> crate::Result<KeyPair> {
         let key_pair = sqlx::query_as!(
             KeyPair,
             r#"

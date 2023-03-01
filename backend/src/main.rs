@@ -1,4 +1,6 @@
-use actix_web::{web, App, HttpServer};
+use actix_session::{storage::RedisActorSessionStore, SessionMiddleware};
+use actix_web::{cookie::Key, web, App, HttpServer};
+use base64::engine::{general_purpose, Engine};
 use routes::routing;
 use sqlx::postgres::PgPoolOptions;
 
@@ -20,11 +22,21 @@ async fn main() {
         .unwrap();
 
     let host_name = std::env::var("HOST_NAME").unwrap();
+    let cookie_key = {
+        let key = std::env::var("COOKIE_KEY").unwrap();
+        let key = general_purpose::STANDARD.decode(key.as_bytes()).unwrap();
+        Key::from(&key)
+    };
+    let redis_url = std::env::var("REDIS_URL").unwrap();
 
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(host_name.clone()))
+            .wrap(SessionMiddleware::new(
+                RedisActorSessionStore::new(&redis_url),
+                cookie_key.clone(),
+            ))
             .service(routing())
     })
     .bind(("0.0.0.0", 3000))

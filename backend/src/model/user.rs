@@ -63,23 +63,3 @@ impl UserRepository for PgPool {
         Ok(user)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[sqlx::test]
-    async fn get_registered_user(pool: PgPool) {
-        let user = User {
-            id: "xxxx".to_string(),
-            name: "ikanago".to_string(),
-            password_hash: "password_hashed".to_string(),
-        };
-        pool.save_user(user).await.unwrap();
-
-        let user = pool.get_user_by_name("ikanago").await.unwrap();
-        assert_eq!(user.id, "xxxx");
-        assert_eq!(user.name, "ikanago");
-        assert_eq!(user.password_hash, "password_hashed");
-    }
-}

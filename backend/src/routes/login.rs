@@ -45,8 +45,41 @@ fn verify_password(password: &str, password_hash: &str) -> crate::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use actix_session::SessionExt;
+    use actix_web::test::TestRequest;
+
+    use crate::routes::signup::{signup_service, Regestration};
+
     use super::*;
 
     #[sqlx::test]
-    async fn invalid_password(pool: PgPool) {}
+    async fn invalid_password(pool: PgPool) {
+        // arrange
+        let req = TestRequest::default().to_srv_request();
+        let session = req.get_session();
+        signup_service(
+            &pool,
+            Regestration {
+                name: "ikanago".to_string(),
+                password: "password".to_string(),
+            },
+            session.clone(),
+        )
+        .await
+        .unwrap();
+
+        // act
+        let res = login_service(
+            &pool,
+            LoginCredential {
+                name: "ikanago".to_string(),
+                password: "xxxx".to_string(),
+            },
+            session,
+        )
+        .await;
+
+        // assert
+        assert!(matches!(res, Err(ServiceError::Unauthorized)));
+    }
 }

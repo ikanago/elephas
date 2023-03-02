@@ -1,6 +1,6 @@
-import React, {createContext, useContext} from "react";
+import { createContext, useContext } from "react";
 
-type Context = {
+interface Context {
     isAuthenticated: boolean;
     authenticate: (callback: VoidFunction) => void;
     unauthenticate: (callback: VoidFunction) => void;
@@ -8,8 +8,12 @@ type Context = {
 
 export const AuthContext = createContext<Context>({
     isAuthenticated: false,
-    authenticate: (callback: VoidFunction) => {},
-    unauthenticate: (callback: VoidFunction) => {},
+    authenticate: (callback: VoidFunction) => {
+        callback();
+    },
+    unauthenticate: (callback: VoidFunction) => {
+        callback();
+    },
 });
 
 export const useAuth = () => useContext(AuthContext);

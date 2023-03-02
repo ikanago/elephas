@@ -11,28 +11,46 @@ const Signup = () => {
     const submit = async () => {
         try {
             // await signup();
-            authenticate(
-                () => navigate("/")
-            );
+            authenticate(() => {
+                navigate("/");
+            });
         } catch (e) {
-    console.error(e);
-}
-    }
+            console.error(e);
+        }
+    };
 
-return <div>
-    <form>
-        <label>
-            Name:
-            <input type="text" value={name} onChange={e => { setName(e.target.value); }} />
-            Password:
-            <input type="password" value={password} onChange={e => { setPassword(e.target.value); }} />
-        </label>
-        <input type="submit" value="Sign up" onClick={e => {
-            e.preventDefault();
-            submit();
-        }} />
-    </form>
-</div>;
+    return (
+        <div>
+            <form>
+                <label>
+                    Name:
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={e => {
+                            setName(e.target.value);
+                        }}
+                    />
+                    Password:
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={e => {
+                            setPassword(e.target.value);
+                        }}
+                    />
+                </label>
+                <input
+                    type="submit"
+                    value="Sign up"
+                    onClick={e => {
+                        e.preventDefault();
+                        submit().catch(console.error);
+                    }}
+                />
+            </form>
+        </div>
+    );
 };
 
 export default Signup;

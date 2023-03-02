@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AuthContext } from "../context";
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -7,24 +7,20 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const authenticate = (callback: VoidFunction) => {
         setIsAuthenticated(true);
         callback();
-    }
+    };
 
     const unauthenticate = (callback: VoidFunction) => {
-        setIsAuthenticated(true);
+        setIsAuthenticated(false);
         callback();
-    }
-
-    useEffect(() => {
-        (async () => {
-            //
-        })();
-    }, []);
+    };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, authenticate, unauthenticate }}>
+        <AuthContext.Provider
+            value={{ isAuthenticated, authenticate, unauthenticate }}
+        >
             {children}
         </AuthContext.Provider>
-    )
+    );
 };
 
 export default AuthProvider;

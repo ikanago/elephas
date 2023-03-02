@@ -5,10 +5,10 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated } = useAuth();
 
     if (!isAuthenticated) {
-        return <Navigate to="/signup" />
+        return <Navigate to="/signup" />;
     }
 
-    return children;
+    return <>{children}</>;
 };
 
 export default RequireAuth;

@@ -11,14 +11,14 @@ const Login = () => {
 
     const submit = async () => {
         try {
-            await fetch(`${config.api}/api/login`, {
+            await fetch(`${config.api}/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    name: name,
-                    password: password,
+                    name,
+                    password,
                 })
             });
             authenticate(() => {

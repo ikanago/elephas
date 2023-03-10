@@ -16,7 +16,7 @@ pub type Result<T> = std::result::Result<T, error::ServiceError>;
 
 #[actix_web::main]
 async fn main() {
-    // dotenvy::dotenv().unwrap();
+    dotenvy::dotenv().unwrap();
 
     let db_url = std::env::var("DATABASE_URL").unwrap();
     dbg!(db_url.clone());
@@ -49,6 +49,8 @@ async fn main() {
             .service(routing())
     })
     .bind(("0.0.0.0", 3000))
+    .unwrap()
+    .bind(("::", 3000))
     .unwrap()
     .run()
     .await

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { config } from "../config";
 import { useAuth } from "../context";
 
-const Signup = () => {
+const Login = () => {
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const { authenticate } = useAuth();
@@ -11,7 +11,7 @@ const Signup = () => {
 
     const submit = async () => {
         try {
-            await fetch(`${config.api}/api/signup`, {
+            await fetch(`${config.api}/api/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -52,7 +52,7 @@ const Signup = () => {
                 </label>
                 <input
                     type="submit"
-                    value="Sign up"
+                    value="Log in"
                     onClick={e => {
                         e.preventDefault();
                         submit().catch(console.error);
@@ -63,4 +63,4 @@ const Signup = () => {
     );
 };
 
-export default Signup;
+export default Login;

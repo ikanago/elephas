@@ -1,5 +1,6 @@
-.env
+*.env
+*.pem
+certs
 db
 target
-*.pem
 jar

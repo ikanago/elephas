@@ -1,4 +1,3 @@
-use actix_cors::Cors;
 use actix_session::{storage::RedisActorSessionStore, SessionMiddleware};
 use actix_web::{
     cookie::{Key, SameSite},
@@ -19,7 +18,6 @@ async fn main() {
     dotenvy::dotenv().unwrap();
 
     let db_url = std::env::var("DATABASE_URL").unwrap();
-    dbg!(db_url.clone());
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&db_url)

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { config } from "../config";
+import { login } from "../api";
 import { useAuth } from "../context";
 
 const Login = () => {
@@ -11,16 +11,7 @@ const Login = () => {
 
     const submit = async () => {
         try {
-            await fetch(`${config.api}/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name,
-                    password,
-                })
-            });
+            await login(name, password);
             authenticate(() => {
                 navigate("/");
             });

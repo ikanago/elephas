@@ -1,5 +1,8 @@
 use actix_session::{storage::RedisActorSessionStore, SessionMiddleware};
-use actix_web::{cookie::Key, web, App, HttpServer};
+use actix_web::{
+    cookie::{Key, SameSite},
+    web, App, HttpServer,
+};
 use base64::engine::{general_purpose, Engine};
 use routes::routing;
 use sqlx::postgres::PgPoolOptions;
@@ -33,13 +36,19 @@ async fn main() {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(host_name.clone()))
-            .wrap(SessionMiddleware::new(
-                RedisActorSessionStore::new(&redis_url),
-                cookie_key.clone(),
-            ))
+            .wrap(
+                SessionMiddleware::builder(
+                    RedisActorSessionStore::new(&redis_url),
+                    cookie_key.clone(),
+                )
+                .cookie_same_site(SameSite::None)
+                .build(),
+            )
             .service(routing())
     })
     .bind(("0.0.0.0", 3000))
+    .unwrap()
+    .bind(("::", 3000))
     .unwrap()
     .run()
     .await

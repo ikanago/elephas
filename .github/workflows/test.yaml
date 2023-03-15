@@ -78,8 +78,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      - run: echo "$(pwd)/node_modules/.bin" >> $GITHUB_PATH
+
       - uses: reviewdog/action-eslint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
-          eslint_flags: 'src/'
+          eslint_flags: 'frontend/src/'

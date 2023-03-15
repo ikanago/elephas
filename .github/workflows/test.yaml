@@ -85,3 +85,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           eslint_flags: 'src/'
+        env:
+          PATH: 'node_modules/.bin:${PATH}'

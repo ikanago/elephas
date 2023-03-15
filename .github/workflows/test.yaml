@@ -86,4 +86,4 @@ jobs:
           reporter: github-pr-review
           eslint_flags: 'src/'
         env:
-          PATH: 'node_modules/.bin:${PATH}'
+          PATH: 'node_modules/.bin:$PATH'

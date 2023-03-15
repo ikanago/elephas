@@ -77,6 +77,8 @@ jobs:
 
       - run: ls -al node_modules
 
+      - run : echo ${{ env.PATH }}
+
       - name: Build
         run: npm run build
 

@@ -3,9 +3,7 @@ import { describe, it } from "mocha";
 describe("sign up", () => {
     it("passes", () => {
         // arrange
-        cy.intercept("POST", "/api/signup", {
-            statusCode: 200,
-        }).as("signup");
+        cy.intercept("POST", "/api/signup").as("signup");
 
         // act
         cy.visit("/signup");
@@ -16,6 +14,10 @@ describe("sign up", () => {
 
         // assert
         cy.location("pathname").should("eq", "/");
-        // TODO: assert that COOKIE exists
+        cy.getAllCookies()
+            .should("have.length", 1)
+            .then(cookies => {
+                expect(cookies[0].name).to.eq("id");
+            })
     });
 });

@@ -1,3 +1,4 @@
+use actix_files::{Files, NamedFile};
 use actix_session::{storage::RedisActorSessionStore, SessionMiddleware};
 use actix_web::{
     cookie::{Key, SameSite},
@@ -45,6 +46,11 @@ async fn main() {
                 .build(),
             )
             .service(routing())
+            .service(Files::new("/assets", "../frontend/dist/assets"))
+            .service(
+                web::resource("/{_:.*}")
+                    .to(|| async { NamedFile::open("../frontend/dist/index.html") }),
+            )
     })
     .bind(("0.0.0.0", 3000))
     .unwrap()

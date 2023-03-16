@@ -8,36 +8,6 @@ services:
     image: postgres:15.2
     volumes:
       - ./backend/db:/var/lib/postgresql/data
-    env_file:
-      ./backend/.db.env
     ports:
       - 5432:5432
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   command: ["npm", "run", "dev", "--host"]
-  #   ports:
-  #     - 5173:5173
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   command: /usr/bin/backend
-  #   env_file:
-  #     - ./backend/.env
-  #     - ./backend/.db.env
-  #   depends_on:
-  #     - db
-  #   ports:
-  #     - 3000:3000
-  # nginx:
-  #   image: nginx:1.23.3
-  #   volumes:
-  #     - ./nginx:/etc/nginx/conf.d
-  #     - ./certs:/etc/nginx/certs
-  #     - ./frontend/dist:/etc/nginx/html
-  #   ports:
-  #     - 443:443
-  #     - 80:80
-  #   restart: always
+

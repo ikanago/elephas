@@ -9,7 +9,7 @@ mod user_info;
 mod webfinger;
 
 pub fn routing() -> Scope {
-    web::scope("")
+    web::scope("/api")
         .service(self::signup::signup)
         .service(self::login::login)
         .service(self::home::home)

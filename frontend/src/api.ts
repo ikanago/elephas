@@ -1,4 +1,4 @@
-const api = "http://localhost:5173/api";
+const api = import.meta.env.DEV ? "http://localhost:5173/api" : "http://localhost:3000/api";
 
 export const home = async () => {
     return await fetch(`${api}/`, {

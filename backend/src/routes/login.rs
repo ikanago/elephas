@@ -25,6 +25,7 @@ async fn login_service(
     LoginCredential { name, password }: LoginCredential,
     session: Session,
 ) -> crate::Result<impl Responder> {
+    // TODO: panics if user not found
     let user = pool.get_user_by_name(&name).await.unwrap();
     verify_password(&password, &user.password_hash)?;
 

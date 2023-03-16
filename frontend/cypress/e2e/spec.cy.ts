@@ -1,6 +1,11 @@
 import { describe, it } from "mocha";
 
 describe("sign up", () => {
+    beforeEach(() => {
+        cy.clearAllCookies();
+        cy.request("DELETE", "/api/reset-db").as("reset-db");
+    });
+
     it("passes", () => {
         // arrange
         cy.intercept("POST", "/api/signup").as("signup");

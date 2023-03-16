@@ -5,6 +5,7 @@ mod host_meta;
 mod inbox;
 mod login;
 mod signup;
+mod reset_db;
 mod user_info;
 mod webfinger;
 
@@ -18,6 +19,8 @@ pub fn routing() -> Scope {
         .service(self::webfinger::webfinger)
         .service(self::host_meta::host_meta)
         .service(ping)
+        // TODO: disable in production
+        .service(self::reset_db::reset_db)
 }
 
 #[get("/ping")]

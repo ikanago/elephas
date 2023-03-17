@@ -30,6 +30,7 @@ jobs:
           - 5432:5432
     env:
       COOKIE_KEY: 'KuNBwnCNhJWdqlVLB2ZJ/1jrQtV3T82c4ds8NS+MIQ4wyVDah5cFbNVZzZrxw2PrvEEhWrZPrmgyvjSF6Qj9Vg=='
+      HOST_NAME: 'localhost:3000'
       DATABASE_URL: 'postgresql://ikanago:password@localhost:5432/test'
       REDIS_URL: 'localhost:6379'
     defaults:
@@ -62,10 +63,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-
 
-      - name: Install frontend dependencies and build
+      - name: Install frontend dependencies
         run: |
           npm ci
-          npm run build
         working-directory: frontend
 
       - name: Run e2e tests

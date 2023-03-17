@@ -54,7 +54,7 @@ async fn main() {
                     .to(|| async { NamedFile::open("../frontend/dist/index.html") }),
             )
     })
-    .bind(("0.0.0.0", 3000))
+    .bind(("0.0.0.0", 3001))
     .unwrap()
     .bind(("::", 3000))
     .unwrap()

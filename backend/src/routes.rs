@@ -4,8 +4,8 @@ mod home;
 mod host_meta;
 mod inbox;
 mod login;
-mod signup;
 mod reset_db;
+mod signup;
 mod user_info;
 mod webfinger;
 

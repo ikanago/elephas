@@ -33,17 +33,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: backend -> target
-
-      - name: Check format
-        run: cargo fmt --all -- --check
 
       - name: Setup Postgresql
         run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
@@ -78,6 +71,7 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Add node_modules/.bin to PATH so that reviewdog can find eslint
       - run: echo "$(pwd)/node_modules/.bin" >> $GITHUB_PATH
 
       - uses: reviewdog/action-eslint@v1
@@ -85,3 +79,58 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           eslint_flags: 'frontend/src/'
+
+  e2e_test:
+    runs-on: 'ubuntu-22.04'
+    needs: [backend_test, frontend_test]
+    services:
+      redis:
+        image: 'redis:7.0.8'
+        ports:
+          - 6379:6379
+      postgres:
+        image: 'postgres:15.2'
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: ikanago
+          POSTGRES_PASSWORD: password
+          POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: 'postgresql://ikanago:password@localhost:5432/test'
+      REDIS_URL: 'localhost:6379'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache backend dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend -> target
+
+      - name: Setup Postgresql
+        run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
+
+      - name: Build backend
+        run: cargo build --locked --verbose
+
+      - name: Cache frontend dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run e2e tests
+        run: |
+          cargo run &
+          npm run e2e

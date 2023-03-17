@@ -4,10 +4,11 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview",
-        "fix": "eslint --fix src/ && prettier --write src/"
+        "dev": "vite",
+        "e2e": "npm run reset-db && npm run build && wait-on http://localhost:3000 && cypress run",
+        "fix": "eslint --fix src/ && prettier --write src/",
+        "reset-db": "pushd ../backend && sqlx database drop -y && sqlx database create && sqlx migrate run && popd"
     },
     "dependencies": {
         "react": "^18.2.0",

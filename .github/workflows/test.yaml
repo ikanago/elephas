@@ -35,6 +35,7 @@ jobs:
       REDIS_URL: 'localhost:6379'
     defaults:
       run:
+        shell: bash
         working-directory: backend
 
     steps:
@@ -73,6 +74,7 @@ jobs:
 
       - uses: cypress-io/github-action@v5
         with:
+          install: false
           start: cd backend && cargo run
           wait-on: 'http://localhost:3000'
           working-directory: frontend

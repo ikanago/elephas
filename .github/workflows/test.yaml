@@ -64,13 +64,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-
 
-      - name: Install frontend dependencies
+      - name: Install frontend dependencies and build
         run: |
           npm ci
+          npm build
         working-directory: frontend
 
       - run: |
-          netstat -tl
+          netstat -a
 
       - uses: cypress-io/github-action@v5
         with:

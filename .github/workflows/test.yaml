@@ -68,6 +68,12 @@ jobs:
           npm run build
         working-directory: frontend
 
+      - name: Run e2e tests
+        run: |
+          cargo run &
+          cd ../frontend
+          npm run e2e:ci
+
   frontend_test:
     runs-on: 'ubuntu-22.04'
     defaults:

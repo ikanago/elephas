@@ -76,6 +76,7 @@ jobs:
           start: cargo run --manifest-path=../backend/Cargo.toml
           wait-on: 'http://localhost:3000/api/ping'
           browser: chrome
+          record: false
           working-directory: frontend
 
   frontend_test:

@@ -1,7 +1,6 @@
 use crate::{error::ServiceError, model::UserRepository};
 use actix_session::Session;
 use actix_web::{post, web, HttpResponse, Responder};
-use argon2::{password_hash::Encoding, Argon2, PasswordHash, PasswordVerifier};
 use serde::Deserialize;
 use sqlx::PgPool;
 
@@ -37,11 +36,15 @@ async fn login_service(
 }
 
 fn verify_password(password: &str, password_hash: &str) -> crate::Result<()> {
-    let hash = PasswordHash::parse(password_hash, Encoding::default())
-        .map_err(|_| ServiceError::InternalServerError)?;
-    Argon2::default()
-        .verify_password(password.as_bytes(), &hash)
-        .map_err(|_| ServiceError::Unauthorized)
+    bcrypt::verify(password, password_hash)
+        .map_err(|_| ServiceError::InternalServerError)
+        .and_then(|is_valid| {
+            if is_valid {
+                Ok(())
+            } else {
+                Err(ServiceError::Unauthorized)
+            }
+        })
 }
 
 #[cfg(test)]

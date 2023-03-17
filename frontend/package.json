@@ -7,7 +7,7 @@
         "build": "tsc && vite build",
         "cy:run": "cypress run -b chrome",
         "dev": "vite",
-        "e2e": "npm run reset-db && start-server-and-test start:backend 'http-get://localhost:3000/api/ping' cy:run",
+        "e2e": "npm run reset-db && npm run build && start-server-and-test start:backend 'http-get://localhost:3000/api/ping' cy:run",
         "fix": "eslint --fix src/ && prettier --write src/",
         "start:backend": "cargo run --manifest-path=../backend/Cargo.toml",
         "reset-db": "pushd ../backend && sqlx database drop -y && sqlx database create && sqlx migrate run && popd"

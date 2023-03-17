@@ -102,6 +102,7 @@ jobs:
 
       - name: Build backend
         run: cargo build --locked --verbose
+        working-directory: backend
 
       - name: Cache frontend dependencies
         uses: actions/cache@v3
@@ -117,8 +118,9 @@ jobs:
         run: |
           npm ci
           npm run build
+        working-directory: frontend
 
       - name: Run e2e tests
         run: |
-          cargo run &
-          npm run e2e
+          pushd backend && cargo run & && popd
+          pushd frontend && npm run e2e

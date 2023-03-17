@@ -122,5 +122,8 @@ jobs:
 
       - name: Run e2e tests
         run: |
-          pushd backend && cargo run & && popd
-          pushd frontend && npm run e2e
+          pushd backend
+          cargo run &
+          popd
+          pushd frontend
+          npm run e2e

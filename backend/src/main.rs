@@ -16,7 +16,9 @@ pub type Result<T> = std::result::Result<T, error::ServiceError>;
 
 #[actix_web::main]
 async fn main() {
-    dotenvy::dotenv().unwrap();
+    if let Err(_) = dotenvy::dotenv() {
+        eprintln!("No .env file found, using environment variables instead")
+    }
 
     let db_url = std::env::var("DATABASE_URL").unwrap();
     let pool = PgPoolOptions::new()

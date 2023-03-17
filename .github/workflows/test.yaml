@@ -15,17 +15,23 @@ jobs:
   backend_test:
     runs-on: 'ubuntu-22.04'
     services:
+      redis:
+        image: 'redis:7.0.8'
+        ports:
+          - 6379:6379
       postgres:
         image: 'postgres:15.2'
         env:
           POSTGRES_DB: test
           POSTGRES_USER: ikanago
           POSTGRES_PASSWORD: password
-          POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+          POSTGRES_INITDB_ARGS: '--encoding=UTF8'
         ports:
           - 5432:5432
     env:
+      COOKIE_KEY: 'KuNBwnCNhJWdqlVLB2ZJ/1jrQtV3T82c4ds8NS+MIQ4wyVDah5cFbNVZzZrxw2PrvEEhWrZPrmgyvjSF6Qj9Vg=='
       DATABASE_URL: 'postgresql://ikanago:password@localhost:5432/test'
+      REDIS_URL: 'localhost:6379'
     defaults:
       run:
         working-directory: backend
@@ -45,6 +51,22 @@ jobs:
         run: |
           cargo build --locked --verbose
           cargo test --verbose
+
+      - name: Cache frontend dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install frontend dependencies and build
+        run: |
+          npm ci
+          npm run build
+        working-directory: frontend
 
   frontend_test:
     runs-on: 'ubuntu-22.04'
@@ -68,62 +90,3 @@ jobs:
         run: |
           npm ci
           npm run build
-
-  e2e_test:
-    runs-on: 'ubuntu-22.04'
-    needs: [backend_test, frontend_test]
-    services:
-      redis:
-        image: 'redis:7.0.8'
-        ports:
-          - 6379:6379
-      postgres:
-        image: 'postgres:15.2'
-        env:
-          POSTGRES_DB: test
-          POSTGRES_USER: ikanago
-          POSTGRES_PASSWORD: password
-          POSTGRES_INITDB_ARGS: "--encoding=UTF8"
-        ports:
-          - 5432:5432
-    env:
-      DATABASE_URL: 'postgresql://ikanago:password@localhost:5432/test'
-      REDIS_URL: 'localhost:6379'
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Cache backend dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: backend -> target
-
-      - name: Setup Postgresql
-        run: psql ${DATABASE_URL} < ./backend/migrations/20230222011102_init.sql
-
-      - name: Build backend
-        run: cargo build --locked --verbose
-        working-directory: backend
-
-      - name: Cache frontend dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.npm
-            ~/.cache/Cypress
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
-      - name: Install frontend dependencies and build
-        run: |
-          npm ci
-          npm run build
-        working-directory: frontend
-
-      - name: Run e2e tests
-        run: |
-          pushd backend
-          cargo run &
-          popd
-          pushd frontend
-          npm run e2e

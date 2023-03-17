@@ -68,12 +68,14 @@ jobs:
           npm ci
         working-directory: frontend
 
-      - name: Run e2e tests
-        run: |
+      - run: |
           netstat -tl
-          cargo run &
-          cd ../frontend
-          npm run e2e:ci
+
+      - uses: cypress-io/github-action@v5
+        with:
+          start: cd backend && cargo run
+          wait-on: 'http://localhost:3000'
+          working-directory: frontend
 
   frontend_test:
     runs-on: 'ubuntu-22.04'

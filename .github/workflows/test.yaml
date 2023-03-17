@@ -75,7 +75,7 @@ jobs:
       - uses: cypress-io/github-action@v5
         with:
           install: false
-          start: cd backend && cargo run
+          start: cargo run --manifest-path=backend/Cargo.toml
           wait-on: 'http://localhost:3000'
           working-directory: frontend
 

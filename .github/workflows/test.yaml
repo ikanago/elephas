@@ -70,6 +70,7 @@ jobs:
 
       - name: Run e2e tests
         run: |
+          netstat -tl
           cargo run &
           cd ../frontend
           npm run e2e:ci

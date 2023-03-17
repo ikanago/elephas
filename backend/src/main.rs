@@ -1,3 +1,4 @@
+use actix_files::{Files, NamedFile};
 use actix_session::{storage::RedisActorSessionStore, SessionMiddleware};
 use actix_web::{
     cookie::{Key, SameSite},
@@ -15,7 +16,10 @@ pub type Result<T> = std::result::Result<T, error::ServiceError>;
 
 #[actix_web::main]
 async fn main() {
-    dotenvy::dotenv().unwrap();
+    // In CI, we don't have a .env file, so we just ignore it
+    if let Err(_) = dotenvy::dotenv() {
+        eprintln!("No .env file found, using environment variables instead")
+    }
 
     let db_url = std::env::var("DATABASE_URL").unwrap();
     let pool = PgPoolOptions::new()
@@ -45,8 +49,13 @@ async fn main() {
                 .build(),
             )
             .service(routing())
+            .service(Files::new("/assets", "../frontend/dist/assets"))
+            .service(
+                web::resource("/{_:.*}")
+                    .to(|| async { NamedFile::open("../frontend/dist/index.html") }),
+            )
     })
-    .bind(("0.0.0.0", 3000))
+    .bind(("0.0.0.0", 3001))
     .unwrap()
     .bind(("::", 3000))
     .unwrap()

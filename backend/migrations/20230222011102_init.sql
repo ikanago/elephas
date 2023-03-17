@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS "user_key_pair" (
     "private_key" TEXT NOT NULL,
     "public_key" TEXT NOT NULL,
 
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

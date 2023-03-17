@@ -16,6 +16,7 @@ pub type Result<T> = std::result::Result<T, error::ServiceError>;
 
 #[actix_web::main]
 async fn main() {
+    // In CI, we don't have a .env file, so we just ignore it
     if let Err(_) = dotenvy::dotenv() {
         eprintln!("No .env file found, using environment variables instead")
     }

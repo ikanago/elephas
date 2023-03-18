@@ -4,9 +4,7 @@ use crate::{
 };
 use actix_session::Session;
 use actix_web::{post, web, HttpResponse, Responder};
-use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand::Rng;
-use rand_core::OsRng;
 use serde::Deserialize;
 use sqlx::PgPool;
 
@@ -67,11 +65,7 @@ fn generate_id(len: usize) -> String {
 }
 
 fn hash_password(password: &str) -> String {
-    let salt = SaltString::generate(&mut OsRng);
-    let hash = Argon2::default()
-        .hash_password(password.as_bytes(), &salt)
-        .expect("password successfully hashed");
-    hash.to_string()
+    bcrypt::hash(password, bcrypt::DEFAULT_COST).expect("password successfully hashed")
 }
 
 #[cfg(test)]

@@ -9,13 +9,12 @@ edition = "2021"
 actix-files = "0.6.2"
 actix-session = { version = "0.7.2", features = ["redis-actor-session"] }
 actix-web = "4.3.1"
-argon2 = "0.5.0"
 async-trait = "0.1.66"
 base64 = "0.21.0"
+bcrypt = "0.14.0"
 chrono = { version = "0.4.24", default-features = false, features = ["clock", "std"] }
 dotenvy = "0.15.6"
 rand = "0.8.5"
-rand_core = { version = "0.6.4", features = ["std"] }
 reqwest = { version = "0.11.14", features = ["json"] }
 rsa = { version = "0.8.2", features = ["sha2"] }
 serde = { version = "1.0.156", features = ["derive"] }

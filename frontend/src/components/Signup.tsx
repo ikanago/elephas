@@ -11,7 +11,7 @@ const Signup = () => {
 
     const submit = async () => {
         try {
-            await signup(name, password);
+            await signup({ name, password });
             authenticate(() => {
                 navigate("/");
             });

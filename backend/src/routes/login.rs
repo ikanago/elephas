@@ -3,13 +3,22 @@ use actix_session::Session;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;
+use utoipa::ToSchema;
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, ToSchema)]
 pub struct LoginCredential {
     pub name: String,
     pub password: String,
 }
 
+#[utoipa::path(
+    request_body = LoginCredential,
+    responses(
+        (status = 200, description = "Successfully logged in"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "InternalServerError"),
+    )
+)]
 #[post("/login")]
 pub async fn login(
     pool: web::Data<PgPool>,
@@ -52,7 +61,7 @@ mod tests {
     use actix_session::SessionExt;
     use actix_web::test::TestRequest;
 
-    use crate::routes::signup::{signup_service, Regestration};
+    use crate::routes::signup::{signup_service, SignupCredential};
 
     use super::*;
 
@@ -63,7 +72,7 @@ mod tests {
         let session = req.get_session();
         signup_service(
             &pool,
-            Regestration {
+            SignupCredential {
                 name: "ikanago".to_string(),
                 password: "password".to_string(),
             },

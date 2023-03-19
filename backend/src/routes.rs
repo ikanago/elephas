@@ -1,4 +1,5 @@
 use actix_web::{get, web, Responder, Scope};
+use utoipa::OpenApi;
 
 mod home;
 mod host_meta;
@@ -27,3 +28,10 @@ pub fn routing() -> Scope {
 async fn ping() -> impl Responder {
     "pong"
 }
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(self::signup::signup, self::login::login),
+    components(schemas(self::signup::SignupCredential, self::login::LoginCredential,))
+)]
+pub struct ApiDoc;

@@ -11,7 +11,7 @@ const Login = () => {
 
     const submit = async () => {
         try {
-            await login(name, password);
+            await login({ name, password });
             authenticate(() => {
                 navigate("/");
             });

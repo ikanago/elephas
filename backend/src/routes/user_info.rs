@@ -84,7 +84,7 @@ async fn user_info_activity_json(
 
 #[cfg(test)]
 mod tests {
-    use crate::routes::signup::{signup_service, Regestration};
+    use crate::routes::signup::{signup_service, SignupCredential};
 
     use super::*;
 
@@ -97,7 +97,7 @@ mod tests {
         let req = TestRequest::default().to_srv_request();
         let session = req.get_session();
         let name = "ikanago".to_string();
-        let regstration = Regestration {
+        let regstration = SignupCredential {
             name: name.clone(),
             password: "password".to_string(),
         };
@@ -131,7 +131,7 @@ mod tests {
         let req = TestRequest::default().to_srv_request();
         let session = req.get_session();
         let first_user_name = "ikanago".to_string();
-        let regstration = Regestration {
+        let regstration = SignupCredential {
             name: first_user_name.clone(),
             password: "password".to_string(),
         };

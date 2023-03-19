@@ -4,8 +4,8 @@ use actix_web::{
     cookie::{Key, SameSite},
     web, App, HttpServer,
 };
-use base64::engine::{general_purpose, Engine};
 use backend::routes::routing;
+use base64::engine::{general_purpose, Engine};
 use sqlx::postgres::PgPoolOptions;
 
 #[actix_web::main]

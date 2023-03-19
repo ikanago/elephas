@@ -11,15 +11,13 @@ const Signup = () => {
     const navigate = useNavigate();
 
     const submit = async () => {
-        try {
-            await signup({ name, password });
+        const r = await signup({ name, password });
+        if (r.ok) {
             authenticate(() => {
                 navigate("/");
             });
-        } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            }
+        } else {
+            setError(r.val.error);
         }
     };
 

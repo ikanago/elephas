@@ -20,12 +20,12 @@ pub struct UserInfoResponse {
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[get("/")]
-pub async fn home(pool: web::Data<PgPool>, session: Session) -> impl Responder {
-    home_service(pool.as_ref(), session).await
+#[get("/me")]
+pub async fn me(pool: web::Data<PgPool>, session: Session) -> impl Responder {
+    me_service(pool.as_ref(), session).await
 }
 
-async fn home_service(pool: &PgPool, session: Session) -> crate::Result<impl Responder> {
+async fn me_service(pool: &PgPool, session: Session) -> crate::Result<impl Responder> {
     // TODO: extract session validation
     let stored_user_id = session
         .get::<String>("user_id")

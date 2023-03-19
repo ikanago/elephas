@@ -1,3 +1,4 @@
+import { Result } from "ts-results";
 import { type components, type operations } from "./schema";
 
 const api = import.meta.env.DEV
@@ -6,64 +7,63 @@ const api = import.meta.env.DEV
 
 type ErrorMessage = components["schemas"]["ErrorMessage"];
 
-export const home = async () => {
-    const res = await fetch(`${api}/`, {
-        method: "GET",
-        credentials: "include",
-    });
+export const me = async () => {
+    return await Result.wrapAsync<
+        components["schemas"]["UserInfoResponse"],
+        ErrorMessage
+    >(async () => {
+        const res = await fetch(`${api}/me`, {
+            method: "GET",
+            credentials: "include",
+        });
 
-    if (!res.ok) {
-        const json: ErrorMessage = await res.json();
-        throw new Error(json.error);
-    }
-    return await res.json() as components["schemas"]["UserInfoResponse"];
+        if (!res.ok) {
+            const json = await res.json();
+            throw json;
+        }
+        return await res.json();
+    });
 };
 
 export const signup = async (
     payload: operations["signup"]["requestBody"]["content"]["application/json"]
 ) => {
-    const res = await fetch(`${api}/signup`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-    });
+    return await Result.wrapAsync<undefined, ErrorMessage>(async () => {
+        const res = await fetch(`${api}/signup`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
 
-    if (!res.ok) {
-        const json: ErrorMessage = await res.json();
-        throw new Error(json.error);
-    }
+        if (!res.ok) {
+            const json: ErrorMessage = await res.json();
+            throw json;
+        }
+
+        // Workaround for eslint warning: @typescript-eslint/no-invalid-void-type complains Result.wrapAsync's void return type.
+        return undefined;
+    });
 };
 
 export const login = async (
     payload: operations["login"]["requestBody"]["content"]["application/json"]
 ) => {
-    const res = await fetch(`${api}/login`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+    return await Result.wrapAsync<undefined, ErrorMessage>(async () => {
+        const res = await fetch(`${api}/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+            const json: ErrorMessage = await res.json();
+            throw json;
+        }
+
+        return undefined;
     });
-
-    if (!res.ok) {
-        const json: ErrorMessage = await res.json();
-        throw new Error(json.error);
-    }
-};
-
-export const user_info = async (
-    name: operations["user_info"]["parameters"]["path"]["name"]
-) => {
-    const res = await fetch(`${api}/user_info/${name}`, {
-        method: "GET",
-        credentials: "include",
-    });
-
-    if (!res.ok) {
-        const json: ErrorMessage = await res.json();
-        throw new Error(json.error);
-    }
-    return await res.json() as components["schemas"]["UserInfoResponse"];
 };

@@ -9,22 +9,25 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/": {
-      "get": {
+    "/login": {
+      "post": {
         "tags": [
-          "self::home"
+          "self::login"
         ],
-        "operationId": "home",
-        "responses": {
-          "200": {
-            "description": "Successfully fetched user info",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserInfoResponse"
-                }
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginCredential"
               }
             }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully logged in"
           },
           "401": {
             "description": "Unauthorized",
@@ -49,25 +52,22 @@
         }
       }
     },
-    "/login": {
-      "post": {
+    "/me": {
+      "get": {
         "tags": [
-          "self::login"
+          "self::me"
         ],
-        "operationId": "login",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginCredential"
-              }
-            }
-          },
-          "required": true
-        },
+        "operationId": "me",
         "responses": {
           "200": {
-            "description": "Successfully logged in"
+            "description": "Successfully fetched user info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfoResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized",

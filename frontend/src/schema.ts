@@ -4,11 +4,11 @@
  */
 
 export interface paths {
-    "/": {
-        get: operations["home"];
-    };
     "/login": {
         post: operations["login"];
+    };
+    "/me": {
+        get: operations["me"];
     };
     "/signup": {
         post: operations["signup"];
@@ -22,22 +22,22 @@ export type webhooks = Record<string, never>;
 
 export interface components {
     schemas: {
-        ErrorMessage: {
-            error: string;
+        readonly ErrorMessage: {
+            readonly error: string;
         };
-        LoginCredential: {
-            name: string;
-            password: string;
+        readonly LoginCredential: {
+            readonly name: string;
+            readonly password: string;
         };
-        SignupCredential: {
+        readonly SignupCredential: {
             /** @example alice */
-            name: string;
+            readonly name: string;
             /** @example password */
-            password: string;
+            readonly password: string;
         };
-        UserInfoResponse: {
+        readonly UserInfoResponse: {
             /** @example alice */
-            name: string;
+            readonly name: string;
         };
     };
     responses: never;
@@ -50,32 +50,10 @@ export interface components {
 export type external = Record<string, never>;
 
 export interface operations {
-    home: {
-        responses: {
-            /** @description Successfully fetched user info */
-            200: {
-                content: {
-                    "application/json": components["schemas"]["UserInfoResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                content: {
-                    "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
-            /** @description InternalServerError */
-            500: {
-                content: {
-                    "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
-        };
-    };
     login: {
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginCredential"];
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["LoginCredential"];
             };
         };
         responses: {
@@ -84,21 +62,43 @@ export interface operations {
             /** @description Unauthorized */
             401: {
                 content: {
-                    "application/json": components["schemas"]["ErrorMessage"];
+                    readonly "application/json": components["schemas"]["ErrorMessage"];
                 };
             };
             /** @description InternalServerError */
             500: {
                 content: {
-                    "application/json": components["schemas"]["ErrorMessage"];
+                    readonly "application/json": components["schemas"]["ErrorMessage"];
+                };
+            };
+        };
+    };
+    me: {
+        responses: {
+            /** @description Successfully fetched user info */
+            200: {
+                content: {
+                    readonly "application/json": components["schemas"]["UserInfoResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorMessage"];
+                };
+            };
+            /** @description InternalServerError */
+            500: {
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorMessage"];
                 };
             };
         };
     };
     signup: {
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SignupCredential"];
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["SignupCredential"];
             };
         };
         responses: {
@@ -107,14 +107,14 @@ export interface operations {
             /** @description InternalServerError */
             500: {
                 content: {
-                    "application/json": components["schemas"]["ErrorMessage"];
+                    readonly "application/json": components["schemas"]["ErrorMessage"];
                 };
             };
         };
     };
     user_info: {
         parameters: {
-            path: {
+            readonly path: {
                 name: string;
             };
         };
@@ -122,19 +122,19 @@ export interface operations {
             /** @description Successfully fetched user info */
             200: {
                 content: {
-                    "application/json": components["schemas"]["UserInfoResponse"];
+                    readonly "application/json": components["schemas"]["UserInfoResponse"];
                 };
             };
             /** @description BadRequest */
             400: {
                 content: {
-                    "application/json": components["schemas"]["ErrorMessage"];
+                    readonly "application/json": components["schemas"]["ErrorMessage"];
                 };
             };
             /** @description InternalServerError */
             500: {
                 content: {
-                    "application/json": components["schemas"]["ErrorMessage"];
+                    readonly "application/json": components["schemas"]["ErrorMessage"];
                 };
             };
         };

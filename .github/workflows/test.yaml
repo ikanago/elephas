@@ -70,6 +70,15 @@ jobs:
           npm run build
         working-directory: frontend
 
+      - name: Check OpenAPI Spec is up to date
+        run: |
+          npm run schema
+          # Just check schema.json, not schema.ts; schema.ts can be differed by formatter even it is up to date.
+          diff=$(git diff -- ../schema.json)
+          echo -n "$diff"
+          # Without `-n`, `echo -n "$diff" | wc -l` is 1 even if `"$diff" is empty.`
+          test $(echo -n "$diff" | wc -l) -eq 0
+
       - uses: cypress-io/github-action@v5
         with:
           install: false

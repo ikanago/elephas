@@ -79,6 +79,7 @@ describe("log in", () => {
             .then(cookies => {
                 expect(cookies[0].name).to.eq("id");
             });
+        cy.get("h1").should("have.text", "cat");
     });
 
     it("failes with wrong password", () => {

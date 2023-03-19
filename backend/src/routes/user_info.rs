@@ -4,9 +4,24 @@ use crate::{
 };
 use actix_session::Session;
 use actix_web::{get, http::header::Accept, web, Responder};
+use serde::Serialize;
 use serde_json::{json, Value};
 use sqlx::PgPool;
+use utoipa::ToSchema;
 
+#[derive(Clone, Serialize, ToSchema)]
+pub struct UserInfoResponse {
+    #[schema(example = "alice")]
+    pub name: String,
+}
+
+#[utoipa::path(
+    responses(
+        (status = 200, body = UserInfoResponse, description = "Successfully fetched user info"),
+        (status = 400, body = ErrorMessage, description = "BadRequest"),
+        (status = 500, body = ErrorMessage, description = "InternalServerError"),
+    )
+)]
 #[get("/users/{name}")]
 async fn user_info(
     pool: web::Data<PgPool>,
@@ -45,9 +60,8 @@ async fn user_info_service(
         return Err(ServiceError::WrongCredential);
     }
 
-    Ok(web::Json(json!({
-        "name": name,
-    })))
+    let res = UserInfoResponse { name: user.name };
+    Ok(web::Json(json!(res)))
 }
 
 async fn user_info_activity_json(

@@ -4,9 +4,24 @@ use crate::{
 };
 use actix_session::Session;
 use actix_web::{get, http::header::Accept, web, Responder};
+use serde::Serialize;
 use serde_json::{json, Value};
 use sqlx::PgPool;
+use utoipa::ToSchema;
 
+#[derive(Clone, Serialize, ToSchema)]
+pub struct UserInfoResponse {
+    #[schema(example = "alice")]
+    pub name: String,
+}
+
+#[utoipa::path(
+    responses(
+        (status = 200, body = UserInfoResponse, description = "Successfully fetched user info"),
+        (status = 400, body = ErrorMessage, description = "BadRequest"),
+        (status = 500, body = ErrorMessage, description = "InternalServerError"),
+    )
+)]
 #[get("/users/{name}")]
 async fn user_info(
     pool: web::Data<PgPool>,
@@ -39,15 +54,14 @@ async fn user_info_service(
     let stored_user_id = session
         .get::<String>("user_id")
         .map_err(|_| ServiceError::InternalServerError)?
-        .ok_or(ServiceError::Unauthorized)?;
+        .ok_or(ServiceError::WrongCredential)?;
     let user = pool.get_user_by_id(&stored_user_id).await.unwrap();
     if name != user.name {
-        return Err(ServiceError::Unauthorized);
+        return Err(ServiceError::WrongCredential);
     }
 
-    Ok(web::Json(json!({
-        "name": name,
-    })))
+    let res = UserInfoResponse { name: user.name };
+    Ok(web::Json(json!(res)))
 }
 
 async fn user_info_activity_json(
@@ -84,7 +98,7 @@ async fn user_info_activity_json(
 
 #[cfg(test)]
 mod tests {
-    use crate::routes::signup::{signup_service, Regestration};
+    use crate::routes::signup::{signup_service, SignupCredential};
 
     use super::*;
 
@@ -97,7 +111,7 @@ mod tests {
         let req = TestRequest::default().to_srv_request();
         let session = req.get_session();
         let name = "ikanago".to_string();
-        let regstration = Regestration {
+        let regstration = SignupCredential {
             name: name.clone(),
             password: "password".to_string(),
         };
@@ -131,7 +145,7 @@ mod tests {
         let req = TestRequest::default().to_srv_request();
         let session = req.get_session();
         let first_user_name = "ikanago".to_string();
-        let regstration = Regestration {
+        let regstration = SignupCredential {
             name: first_user_name.clone(),
             password: "password".to_string(),
         };

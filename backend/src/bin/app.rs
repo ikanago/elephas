@@ -4,15 +4,9 @@ use actix_web::{
     cookie::{Key, SameSite},
     web, App, HttpServer,
 };
+use backend::routes::routing;
 use base64::engine::{general_purpose, Engine};
-use routes::routing;
 use sqlx::postgres::PgPoolOptions;
-
-mod error;
-mod model;
-mod routes;
-
-pub type Result<T> = std::result::Result<T, error::ServiceError>;
 
 #[actix_web::main]
 async fn main() {

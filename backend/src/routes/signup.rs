@@ -7,19 +7,29 @@ use actix_web::{post, web, HttpResponse, Responder};
 use rand::Rng;
 use serde::Deserialize;
 use sqlx::PgPool;
+use utoipa::ToSchema;
 
 const ID_LEN: usize = 16;
 
-#[derive(Clone, Deserialize)]
-pub struct Regestration {
+#[derive(Clone, Deserialize, ToSchema)]
+pub struct SignupCredential {
+    #[schema(example = "alice")]
     pub name: String,
+    #[schema(example = "password")]
     pub password: String,
 }
 
+#[utoipa::path(
+    request_body = SignupCredential,
+    responses(
+        (status = 200, description = "Successfully created a new user"),
+        (status = 500, body = ErrorMessage, description = "InternalServerError"),
+    )
+)]
 #[post("/signup")]
 pub async fn signup(
     pool: web::Data<PgPool>,
-    body: web::Json<Regestration>,
+    body: web::Json<SignupCredential>,
     session: Session,
 ) -> crate::Result<impl Responder> {
     signup_service(pool.as_ref(), body.into_inner(), session).await
@@ -27,7 +37,7 @@ pub async fn signup(
 
 pub async fn signup_service(
     pool: &PgPool,
-    Regestration { name, password }: Regestration,
+    SignupCredential { name, password }: SignupCredential,
     session: Session,
 ) -> crate::Result<impl Responder> {
     if pool.get_user_by_name(&name).await.is_ok() {
@@ -80,7 +90,7 @@ mod tests {
         // arrange
         let req = TestRequest::default().to_srv_request();
         let session = req.get_session();
-        let regstration = Regestration {
+        let regstration = SignupCredential {
             name: "ikanago".to_string(),
             password: "password".to_string(),
         };

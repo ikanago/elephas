@@ -73,7 +73,7 @@ jobs:
       - uses: cypress-io/github-action@v5
         with:
           install: false
-          start: cargo run --manifest-path=../backend/Cargo.toml
+          start: npm run start:backend
           wait-on: 'http://localhost:3000/api/ping'
           browser: chrome
           record: false

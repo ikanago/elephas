@@ -24,6 +24,31 @@ describe("sign up", () => {
                 expect(cookies[0].name).to.eq("id");
             });
     });
+
+    it("w/ already signed up user name fails", () => {
+        // arrange
+        cy.intercept("POST", "/api/signup").as("signup");
+
+        // act
+        const username = "cat";
+        const password = "pass";
+        cy.visit("/signup");
+        cy.get('input[name="username"]').type(username);
+        cy.get('input[name="password"]').type(password);
+        cy.get('input[type="submit"]').click();
+        cy.wait("@signup");
+
+        // sign up again
+        cy.visit("/signup");
+        cy.get('input[name="username"]').type(username);
+        cy.get('input[name="password"]').type(password);
+        cy.get('input[type="submit"]').click();
+        cy.wait("@signup");
+
+        // assert
+        cy.location("pathname").should("eq", "/signup");
+        cy.get(".error").should("have.text", "The user name is already used.");
+    });
 });
 
 describe("log in", () => {
@@ -54,6 +79,7 @@ describe("log in", () => {
             .then(cookies => {
                 expect(cookies[0].name).to.eq("id");
             });
+        cy.get("h1").should("have.text", "cat");
     });
 
     it("failes with wrong password", () => {
@@ -68,7 +94,8 @@ describe("log in", () => {
         cy.wait("@login");
 
         // assert
-        cy.location("pathname").should("eq", "/");
+        cy.location("pathname").should("eq", "/login");
         cy.getAllCookies().should("have.length", 0);
+        cy.get(".error").should("have.text", "User name or password is wrong.");
     });
 });

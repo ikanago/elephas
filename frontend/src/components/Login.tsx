@@ -6,17 +6,18 @@ import { useAuth } from "../context";
 const Login = () => {
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
     const { authenticate } = useAuth();
     const navigate = useNavigate();
 
     const submit = async () => {
-        try {
-            await login(name, password);
+        const r = await login({ name, password });
+        if (r.ok) {
             authenticate(() => {
                 navigate("/");
             });
-        } catch (e) {
-            console.error(e);
+        } else {
+            setError(r.val.error);
         }
     };
 
@@ -52,6 +53,7 @@ const Login = () => {
                     }}
                 />
             </form>
+            <p className="error">{error}</p>
         </div>
     );
 };

@@ -23,7 +23,7 @@ pub struct SignupCredential {
     request_body = SignupCredential,
     responses(
         (status = 200, description = "Successfully created a new user"),
-        (status = 500, description = "InternalServerError"),
+        (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
 #[post("/signup")]

@@ -32,6 +32,6 @@ async fn ping() -> impl Responder {
 #[derive(OpenApi)]
 #[openapi(
     paths(self::signup::signup, self::login::login),
-    components(schemas(self::signup::SignupCredential, self::login::LoginCredential,))
+    components(schemas(self::signup::SignupCredential, self::login::LoginCredential, crate::error::ErrorMessage))
 )]
 pub struct ApiDoc;

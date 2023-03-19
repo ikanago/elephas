@@ -15,7 +15,7 @@ async fn home_service(pool: &PgPool, session: Session) -> crate::Result<impl Res
     let stored_user_id = session
         .get::<String>("user_id")
         .map_err(|_| ServiceError::InternalServerError)?
-        .ok_or(ServiceError::Unauthorized)?;
+        .ok_or(ServiceError::WrongCredential)?;
     let user = pool.get_user_by_id(&stored_user_id).await.unwrap();
 
     Ok(HttpResponse::Ok().json(json!({

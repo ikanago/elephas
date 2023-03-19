@@ -39,10 +39,10 @@ async fn user_info_service(
     let stored_user_id = session
         .get::<String>("user_id")
         .map_err(|_| ServiceError::InternalServerError)?
-        .ok_or(ServiceError::Unauthorized)?;
+        .ok_or(ServiceError::WrongCredential)?;
     let user = pool.get_user_by_id(&stored_user_id).await.unwrap();
     if name != user.name {
-        return Err(ServiceError::Unauthorized);
+        return Err(ServiceError::WrongCredential);
     }
 
     Ok(web::Json(json!({

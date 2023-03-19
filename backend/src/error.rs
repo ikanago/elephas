@@ -1,5 +1,6 @@
 use actix_web::{body::MessageBody, http::header, HttpResponse, ResponseError};
 use thiserror::Error;
+use utoipa::ToSchema;
 
 #[derive(Debug, Error)]
 pub enum ServiceError {
@@ -7,8 +8,8 @@ pub enum ServiceError {
     NameAlreadyTaken,
     #[error("Invalid ActivityPub request: {0}")]
     InvalidActivityPubRequest(String),
-    #[error("Unauthorized")]
-    Unauthorized,
+    #[error("User name or password is wrong.")]
+    WrongCredential,
 
     #[error("Internal server error")]
     InternalServerError,
@@ -20,13 +21,24 @@ pub enum ServiceError {
     RequestError(#[from] reqwest::Error),
 }
 
+#[derive(ToSchema)]
+pub struct ErrorMessage {
+    pub error: String,
+}
+
+impl std::fmt::Display for ErrorMessage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, r#"{{"error": "{}"}}"#, self.error)
+    }
+}
+
 impl ResponseError for ServiceError {
     fn status_code(&self) -> reqwest::StatusCode {
         match self {
             ServiceError::NameAlreadyTaken | ServiceError::InvalidActivityPubRequest(_) => {
                 reqwest::StatusCode::BAD_REQUEST
             }
-            ServiceError::Unauthorized => reqwest::StatusCode::UNAUTHORIZED,
+            ServiceError::WrongCredential => reqwest::StatusCode::UNAUTHORIZED,
             ServiceError::InternalServerError
             | ServiceError::QueryError(_)
             | ServiceError::KeyError(_)
@@ -38,7 +50,10 @@ impl ResponseError for ServiceError {
         let mut res = HttpResponse::new(self.status_code());
         res.headers_mut()
             .insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
-        let body = MessageBody::boxed(format!("error: {}", self.to_string()));
+        let message = ErrorMessage {
+            error: self.to_string(),
+        };
+        let body = MessageBody::boxed(message.to_string());
         res.set_body(body)
     }
 }

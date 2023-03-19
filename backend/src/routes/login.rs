@@ -15,8 +15,8 @@ pub struct LoginCredential {
     request_body = LoginCredential,
     responses(
         (status = 200, description = "Successfully logged in"),
-        (status = 401, description = "Unauthorized"),
-        (status = 500, description = "InternalServerError"),
+        (status = 401, body = ErrorMessage, description = "Unauthorized"),
+        (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
 #[post("/login")]
@@ -51,7 +51,7 @@ fn verify_password(password: &str, password_hash: &str) -> crate::Result<()> {
             if is_valid {
                 Ok(())
             } else {
-                Err(ServiceError::Unauthorized)
+                Err(ServiceError::WrongCredential)
             }
         })
 }
@@ -93,6 +93,6 @@ mod tests {
         .await;
 
         // assert
-        assert!(matches!(res, Err(ServiceError::Unauthorized)));
+        assert!(matches!(res, Err(ServiceError::WrongCredential)));
     }
 }

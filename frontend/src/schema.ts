@@ -3,140 +3,142 @@
  * Do not make direct changes to the file.
  */
 
+
 export interface paths {
-    "/login": {
-        post: operations["login"];
-    };
-    "/me": {
-        get: operations["me"];
-    };
-    "/signup": {
-        post: operations["signup"];
-    };
-    "/users/{name}": {
-        get: operations["user_info"];
-    };
+  "/login": {
+    post: operations["login"];
+  };
+  "/me": {
+    get: operations["me"];
+  };
+  "/signup": {
+    post: operations["signup"];
+  };
+  "/users/{name}": {
+    get: operations["user_info"];
+  };
 }
 
 export type webhooks = Record<string, never>;
 
 export interface components {
-    schemas: {
-        readonly ErrorMessage: {
-            readonly error: string;
-        };
-        readonly LoginCredential: {
-            readonly name: string;
-            readonly password: string;
-        };
-        readonly SignupCredential: {
-            /** @example alice */
-            readonly name: string;
-            /** @example password */
-            readonly password: string;
-        };
-        readonly UserInfoResponse: {
-            /** @example alice */
-            readonly name: string;
-        };
+  schemas: {
+    readonly ErrorMessage: {
+      readonly error: string;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    readonly LoginCredential: {
+      readonly name: string;
+      readonly password: string;
+    };
+    readonly SignupCredential: {
+      /** @example alice */
+      readonly name: string;
+      /** @example password */
+      readonly password: string;
+    };
+    readonly UserInfoResponse: {
+      /** @example alice */
+      readonly name: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 
 export type external = Record<string, never>;
 
 export interface operations {
-    login: {
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["LoginCredential"];
-            };
-        };
-        responses: {
-            /** @description Successfully logged in */
-            200: never;
-            /** @description Unauthorized */
-            401: {
-                content: {
-                    readonly "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
-            /** @description InternalServerError */
-            500: {
-                content: {
-                    readonly "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
-        };
+
+  login: {
+    readonly requestBody: {
+      readonly content: {
+        readonly "application/json": components["schemas"]["LoginCredential"];
+      };
     };
-    me: {
-        responses: {
-            /** @description Successfully fetched user info */
-            200: {
-                content: {
-                    readonly "application/json": components["schemas"]["UserInfoResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                content: {
-                    readonly "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
-            /** @description InternalServerError */
-            500: {
-                content: {
-                    readonly "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
+    responses: {
+      /** @description Successfully logged in */
+      200: never;
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
         };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
     };
-    signup: {
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["SignupCredential"];
-            };
+  };
+  me: {
+    responses: {
+      /** @description Successfully fetched user info */
+      200: {
+        content: {
+          readonly "application/json": components["schemas"]["UserInfoResponse"];
         };
-        responses: {
-            /** @description Successfully created a new user */
-            200: never;
-            /** @description InternalServerError */
-            500: {
-                content: {
-                    readonly "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
+      };
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
         };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
     };
-    user_info: {
-        parameters: {
-            readonly path: {
-                name: string;
-            };
-        };
-        responses: {
-            /** @description Successfully fetched user info */
-            200: {
-                content: {
-                    readonly "application/json": components["schemas"]["UserInfoResponse"];
-                };
-            };
-            /** @description BadRequest */
-            400: {
-                content: {
-                    readonly "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
-            /** @description InternalServerError */
-            500: {
-                content: {
-                    readonly "application/json": components["schemas"]["ErrorMessage"];
-                };
-            };
-        };
+  };
+  signup: {
+    readonly requestBody: {
+      readonly content: {
+        readonly "application/json": components["schemas"]["SignupCredential"];
+      };
     };
+    responses: {
+      /** @description Successfully created a new user */
+      200: never;
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
+  user_info: {
+    parameters: {
+      readonly path: {
+        name: string;
+      };
+    };
+    responses: {
+      /** @description Successfully fetched user info */
+      200: {
+        content: {
+          readonly "application/json": components["schemas"]["UserInfoResponse"];
+        };
+      };
+      /** @description BadRequest */
+      400: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
 }

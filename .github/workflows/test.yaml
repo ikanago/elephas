@@ -78,6 +78,7 @@ jobs:
           echo -n "$diff"
           # Without `-n`, `echo -n "$diff" | wc -l` is 1 even if `"$diff" is empty.`
           test $(echo -n "$diff" | wc -l) -eq 0
+        working-directory: frontend
 
       - uses: cypress-io/github-action@v5
         with:

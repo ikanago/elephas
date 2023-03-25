@@ -6,6 +6,7 @@ struct Table {
 }
 
 #[delete("/reset-db")]
+#[tracing::instrument(skip(pool))]
 pub async fn reset_db(pool: web::Data<PgPool>) -> crate::Result<impl Responder> {
     let tables = sqlx::query_as!(
         Table,

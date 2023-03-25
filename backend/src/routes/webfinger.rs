@@ -5,12 +5,13 @@ use sqlx::PgPool;
 
 use crate::model::UserRepository;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct WebfingerQuery {
     resource: String,
 }
 
 #[get("/.well-known/webfinger")]
+#[tracing::instrument(skip(pool))]
 pub async fn webfinger(
     pool: web::Data<PgPool>,
     host_name: web::Data<String>,

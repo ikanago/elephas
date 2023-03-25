@@ -3,9 +3,10 @@ use actix_session::Session;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;
+use tracing::info;
 use utoipa::ToSchema;
 
-#[derive(Clone, Deserialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct LoginCredential {
     pub name: String,
     pub password: String,
@@ -20,6 +21,7 @@ pub struct LoginCredential {
     )
 )]
 #[post("/login")]
+#[tracing::instrument(skip(pool, session))]
 pub async fn login(
     pool: web::Data<PgPool>,
     body: web::Json<LoginCredential>,
@@ -35,12 +37,15 @@ async fn login_service(
 ) -> crate::Result<impl Responder> {
     // TODO: panics if user not found
     let user = pool.get_user_by_name(&name).await.unwrap();
+    info!(user = ?user);
     verify_password(&password, &user.password_hash)?;
 
     session.renew();
+    info!("Renew the session");
     session
-        .insert("user_id", user.id)
+        .insert("user_id", user.id.clone())
         .expect("user ID is must be serializable");
+    info!("Create a session for the user {}.", user.id);
     Ok(HttpResponse::Ok().finish())
 }
 

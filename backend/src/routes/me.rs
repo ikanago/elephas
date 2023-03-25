@@ -3,6 +3,7 @@ use actix_web::{get, web, HttpResponse, Responder};
 use serde::Serialize;
 use serde_json::json;
 use sqlx::PgPool;
+use tracing::info;
 use utoipa::ToSchema;
 
 use crate::{error::ServiceError, model::UserRepository};
@@ -21,6 +22,7 @@ pub struct UserInfoResponse {
     )
 )]
 #[get("/me")]
+#[tracing::instrument(skip(pool, session))]
 pub async fn me(pool: web::Data<PgPool>, session: Session) -> impl Responder {
     me_service(pool.as_ref(), session).await
 }
@@ -32,6 +34,7 @@ async fn me_service(pool: &PgPool, session: Session) -> crate::Result<impl Respo
         .map_err(|_| ServiceError::InternalServerError)?
         .ok_or(ServiceError::WrongCredential)?;
     let user = pool.get_user_by_id(&stored_user_id).await.unwrap();
+    info!(user = ?user);
 
     let res = UserInfoResponse { name: user.name };
     Ok(HttpResponse::Ok().json(json!(res)))

@@ -6,10 +6,14 @@ use base64::engine::{general_purpose, Engine};
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
 use tracing_actix_web::TracingLogger;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[actix_web::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env())
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
     // In CI, we don't have a .env file, so we just ignore it
     if let Err(_) = dotenvy::dotenv() {

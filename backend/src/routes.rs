@@ -1,10 +1,10 @@
 use actix_web::{get, web, Responder, Scope};
 use utoipa::OpenApi;
 
-mod me;
 mod host_meta;
 mod inbox;
 mod login;
+mod me;
 mod reset_db;
 mod signup;
 mod user_info;
@@ -25,6 +25,7 @@ pub fn routing() -> Scope {
 }
 
 #[get("/ping")]
+#[tracing::instrument]
 async fn ping() -> impl Responder {
     "pong"
 }

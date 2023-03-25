@@ -5,7 +5,7 @@ use serde::Deserialize;
 use sqlx::PgPool;
 use utoipa::ToSchema;
 
-#[derive(Clone, Deserialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct LoginCredential {
     pub name: String,
     pub password: String,
@@ -20,6 +20,7 @@ pub struct LoginCredential {
     )
 )]
 #[post("/login")]
+#[tracing::instrument(skip(pool, session))]
 pub async fn login(
     pool: web::Data<PgPool>,
     body: web::Json<LoginCredential>,

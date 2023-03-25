@@ -21,6 +21,7 @@ pub struct UserInfoResponse {
     )
 )]
 #[get("/me")]
+#[tracing::instrument(skip(pool, session))]
 pub async fn me(pool: web::Data<PgPool>, session: Session) -> impl Responder {
     me_service(pool.as_ref(), session).await
 }

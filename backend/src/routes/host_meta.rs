@@ -1,6 +1,7 @@
 use actix_web::{get, web, HttpResponse, Responder};
 
 #[get("/.well-known/host-meta")]
+#[tracing::instrument]
 pub async fn host_meta(host_name: web::Data<String>) -> impl Responder {
     let host_name = &**host_name;
     HttpResponse::Ok()

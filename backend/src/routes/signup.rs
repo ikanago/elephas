@@ -11,7 +11,7 @@ use utoipa::ToSchema;
 
 const ID_LEN: usize = 16;
 
-#[derive(Clone, Deserialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct SignupCredential {
     #[schema(example = "alice")]
     pub name: String,
@@ -27,6 +27,7 @@ pub struct SignupCredential {
     )
 )]
 #[post("/signup")]
+#[tracing::instrument(skip(pool, session))]
 pub async fn signup(
     pool: web::Data<PgPool>,
     body: web::Json<SignupCredential>,

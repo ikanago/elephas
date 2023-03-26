@@ -67,3 +67,43 @@ export const login = async (
         return undefined;
     });
 };
+
+export const createPost = async (
+    payload: operations["create_post"]["requestBody"]["content"]["application/json"]
+) => {
+    return await Result.wrapAsync<undefined, ErrorMessage>(async () => {
+        const res = await fetch(`${api}/posts`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+            const json: ErrorMessage = await res.json();
+            throw json;
+        }
+
+        return undefined;
+    });
+};
+
+export const getPostsOfMe = async () => {
+    return await Result.wrapAsync<
+        Array<components["schemas"]["Post"]>,
+        ErrorMessage
+    >(async () => {
+        const res = await fetch(`${api}/posts`, {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!res.ok) {
+            const json: ErrorMessage = await res.json();
+            throw json;
+        }
+
+        return await res.json();
+    });
+};

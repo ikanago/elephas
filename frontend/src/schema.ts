@@ -74,7 +74,7 @@ export interface operations {
     };
     responses: {
       /** @description Successfully logged in */
-      200: never;
+      204: never;
       /** @description Unauthorized */
       401: {
         content: {
@@ -116,7 +116,7 @@ export interface operations {
       /** @description Successfully get posts for a user */
       200: {
         content: {
-          readonly "application/json": readonly (components["schemas"]["Post"])[];
+          readonly "application/json": ReadonlyArray<components["schemas"]["Post"]>;
         };
       };
       /** @description Unauthorized */
@@ -140,8 +140,8 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Successfully logged in */
-      200: never;
+      /** @description Successfully created a post */
+      204: never;
       /** @description Unauthorized */
       401: {
         content: {
@@ -164,7 +164,7 @@ export interface operations {
     };
     responses: {
       /** @description Successfully created a new user */
-      200: never;
+      204: never;
       /** @description InternalServerError */
       500: {
         content: {

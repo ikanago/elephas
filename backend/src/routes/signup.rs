@@ -23,7 +23,7 @@ pub struct SignupCredential {
 #[utoipa::path(
     request_body = SignupCredential,
     responses(
-        (status = 200, description = "Successfully created a new user"),
+        (status = 204, description = "Successfully created a new user"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
@@ -68,7 +68,7 @@ pub async fn signup_service(
         .insert("user_id", user.id.clone())
         .expect("user ID is must be serializable");
     info!("Create a session for the user {}.", user.id);
-    Ok(HttpResponse::Ok())
+    Ok(HttpResponse::NoContent().finish())
 }
 
 fn generate_id(len: usize) -> String {

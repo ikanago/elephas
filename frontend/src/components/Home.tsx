@@ -9,18 +9,19 @@ const Home = () => {
     const { data: posts, mutate } = useMyPosts();
 
     const submit = async () => {
-        const r = await createPost({ content });
-        if (r.ok) {
+        const res = await createPost({ content });
+        console.log(res);
+        if (res.status === 204) {
             setContent("");
-            mutate();
+            await mutate();
         } else {
-            setError(r.val.error);
+            setError(res.data.error);
         }
     };
 
     return (
         <>
-            <h1>{me?.unwrap().name}</h1>
+            {me?.status === 200 ? <h1>{me.data.name}</h1> : <h1>Not logged in</h1>}
             <form>
                 <label>
                     Post:
@@ -28,7 +29,7 @@ const Home = () => {
                         type="text"
                         name="content"
                         value={content}
-                        onChange={e => setContent(e.target.value)}
+                        onChange={e => { setContent(e.target.value); }}
                     />
                 </label>
                 <input
@@ -42,11 +43,12 @@ const Home = () => {
             </form>
             <p className="error">{error}</p>
             <div className="timeline">
-                {posts?.unwrap().map(post => (
-                    <div className="post" key={post.id}>
-                        <p>{post.content}</p>
-                    </div>
-                ))}
+                {posts?.status === 200 ?
+                    posts?.data.map(post => (
+                        <div className="post" key={post.id}>
+                            <p>{post.content}</p>
+                        </div>
+                    )) : <p>Loading...</p>}
             </div>
         </>
     );

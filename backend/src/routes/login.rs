@@ -15,7 +15,7 @@ pub struct LoginCredential {
 #[utoipa::path(
     request_body = LoginCredential,
     responses(
-        (status = 200, description = "Successfully logged in"),
+        (status = 204, description = "Successfully logged in"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
@@ -46,7 +46,7 @@ async fn login_service(
         .insert("user_id", user.id.clone())
         .expect("user ID is must be serializable");
     info!("Create a session for the user {}.", user.id);
-    Ok(HttpResponse::Ok().finish())
+    Ok(HttpResponse::NoContent().finish())
 }
 
 fn verify_password(password: &str, password_hash: &str) -> crate::Result<()> {

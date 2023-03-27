@@ -1,23 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signup } from "../api";
-import { useAuth } from "../context";
 
 const Signup = () => {
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const { authenticate } = useAuth();
     const navigate = useNavigate();
 
     const submit = async () => {
-        const r = await signup({ name, password });
-        if (r.ok) {
-            authenticate(() => {
-                navigate("/");
-            });
+        const res = await signup({ name, password });
+        if (res.status === 204) {
+            navigate("/");
         } else {
-            setError(r.val.error);
+            setError(res.data.error);
         }
     };
 

@@ -26,7 +26,7 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "204": {
             "description": "Successfully logged in"
           },
           "401": {
@@ -150,8 +150,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "Successfully logged in"
+          "204": {
+            "description": "Successfully created a post"
           },
           "401": {
             "description": "Unauthorized",
@@ -193,7 +193,7 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "204": {
             "description": "Successfully created a new user"
           },
           "500": {

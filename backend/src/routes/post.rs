@@ -18,7 +18,7 @@ pub struct NewPost {
 #[utoipa::path(
     request_body = NewPost,
     responses(
-        (status = 200, description = "Successfully logged in"),
+        (status = 204, description = "Successfully created a post"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
@@ -49,7 +49,7 @@ async fn create_post_service(
         published_at: Utc::now(),
     };
     pool.save_post(post).await?;
-    Ok(HttpResponse::Ok().finish())
+    Ok(HttpResponse::NoContent().finish())
 }
 
 #[utoipa::path(

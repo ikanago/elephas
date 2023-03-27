@@ -1,109 +1,91 @@
-import { Result } from "ts-results";
-import { type components, type operations } from "./schema";
+import { type paths } from "./schema";
 
 const api = import.meta.env.DEV
     ? "http://localhost:5173/api"
     : "http://localhost:3000/api";
 
-type ErrorMessage = components["schemas"]["ErrorMessage"];
+export type ResponseGet<P extends keyof paths> = paths[P] extends { get: infer Get }
+    ? Get extends { responses: infer Statuses }
+        ? {
+            [K in keyof Statuses]:
+                Statuses[K] extends { content: infer Content }
+                    ? Content extends { "application/json": infer Data }
+                        ? { status: K, data: Data }
+                        : { status: K }
+                    : never;
+        }[keyof Statuses]
+        : never
+    : never; 
 
-export const me = async () => {
-    return await Result.wrapAsync<
-        components["schemas"]["UserInfoResponse"],
-        ErrorMessage
-    >(async () => {
-        const res = await fetch(`${api}/me`, {
-            method: "GET",
-            credentials: "include",
-        });
-
-        if (!res.ok) {
-            const json = await res.json();
-            throw json;
+type Payload<P extends keyof paths> = paths[P] extends { post: infer Post }
+    ? Post extends 
+        {
+            requestBody: {
+                content: {
+                    "application/json": infer Body
+                }
+            }
         }
-        return await res.json();
+        ? Body : undefined
+    : undefined;
+
+export type ResponsePost<P extends keyof paths> = paths[P] extends { post: infer Post }
+    ? Post extends { responses: infer Statuses }
+        ? {
+            [K in keyof Statuses]:
+                Statuses[K] extends { content: infer Content }
+                    ? Content extends { "application/json": infer Response }
+                        ? { status: K, data: Response }
+                        : { status: K }
+                    : never;
+        }[keyof Statuses]
+        : never
+    : never; 
+
+const get = <P extends keyof paths>(path: P) => async (): Promise<ResponseGet<P>> => {
+    const res = await fetch(`${api}${path}`, {
+        method: "GET",
+        credentials: "include",
     });
+
+    const data = await res.json();
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const response = {
+        status: res.status,
+        data,
+    } as ResponseGet<P>;
+    return response;
 };
 
-export const signup = async (
-    payload: operations["signup"]["requestBody"]["content"]["application/json"]
-) => {
-    return await Result.wrapAsync<undefined, ErrorMessage>(async () => {
-        const res = await fetch(`${api}/signup`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if (!res.ok) {
-            const json: ErrorMessage = await res.json();
-            throw json;
-        }
-
-        // Workaround for eslint warning: @typescript-eslint/no-invalid-void-type complains Result.wrapAsync's void return type.
-        return undefined;
+const post = <P extends keyof paths>(path: P) => async (payload: Payload<P>): Promise<ResponsePost<P>> => {
+    const res = await fetch(`${api}${path}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
     });
+
+    if (res.status === 204) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        return {
+            status: res.status,
+        } as ResponsePost<P>;
+    }
+
+    const data = await res.json();
+    return {
+        status: res.status,
+        data,
+    } as unknown as ResponsePost<P>;
 };
 
-export const login = async (
-    payload: operations["login"]["requestBody"]["content"]["application/json"]
-) => {
-    return await Result.wrapAsync<undefined, ErrorMessage>(async () => {
-        const res = await fetch(`${api}/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
+export const me = get("/me");
 
-        if (!res.ok) {
-            const json: ErrorMessage = await res.json();
-            throw json;
-        }
+export const signup = post("/signup");
 
-        return undefined;
-    });
-};
+export const login = post("/login");
 
-export const createPost = async (
-    payload: operations["create_post"]["requestBody"]["content"]["application/json"]
-) => {
-    return await Result.wrapAsync<undefined, ErrorMessage>(async () => {
-        const res = await fetch(`${api}/posts`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
+export const createPost = post("/posts");
 
-        if (!res.ok) {
-            const json: ErrorMessage = await res.json();
-            throw json;
-        }
-
-        return undefined;
-    });
-};
-
-export const getPostsOfMe = async () => {
-    return await Result.wrapAsync<
-        Array<components["schemas"]["Post"]>,
-        ErrorMessage
-    >(async () => {
-        const res = await fetch(`${api}/posts`, {
-            method: "GET",
-            credentials: "include",
-        });
-
-        if (!res.ok) {
-            const json: ErrorMessage = await res.json();
-            throw json;
-        }
-
-        return await res.json();
-    });
-};
+export const getPostsOfMe = get("/posts");

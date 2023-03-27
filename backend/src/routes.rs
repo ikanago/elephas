@@ -5,6 +5,7 @@ mod host_meta;
 mod inbox;
 mod login;
 mod me;
+mod post;
 mod reset_db;
 mod signup;
 mod user_info;
@@ -16,6 +17,8 @@ pub fn routing() -> Scope {
         .service(self::login::login)
         .service(self::me::me)
         .service(self::user_info::user_info)
+        .service(self::post::create_post)
+        .service(self::post::get_posts_by_user_id)
         .service(self::inbox::inbox)
         .service(self::webfinger::webfinger)
         .service(self::host_meta::host_meta)
@@ -36,12 +39,16 @@ async fn ping() -> impl Responder {
         self::signup::signup,
         self::login::login,
         self::me::me,
-        self::user_info::user_info
+        self::user_info::user_info,
+        self::post::create_post,
+        self::post::get_posts_by_user_id,
     ),
     components(schemas(
         self::signup::SignupCredential,
         self::login::LoginCredential,
         self::user_info::UserInfoResponse,
+        self::post::NewPost,
+        crate::model::post::Post,
         crate::error::ErrorMessage
     ))
 )]

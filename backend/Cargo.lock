@@ -446,6 +446,7 @@ dependencies = [
  "tracing-actix-web",
  "tracing-subscriber",
  "utoipa",
+ "uuid",
 ]
 
 [[package]]
@@ -602,6 +603,7 @@ dependencies = [
  "iana-time-zone",
  "num-integer",
  "num-traits",
+ "serde",
  "winapi",
 ]
 
@@ -2288,6 +2290,7 @@ dependencies = [
  "bitflags",
  "byteorder",
  "bytes",
+ "chrono",
  "crc",
  "crossbeam-queue",
  "dirs",

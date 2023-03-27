@@ -11,3 +11,12 @@ CREATE TABLE IF NOT EXISTS "user_key_pair" (
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS "posts" (
+    "id" TEXT PRIMARY KEY,
+    "user_id" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "published_at" TIMESTAMPTZ NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

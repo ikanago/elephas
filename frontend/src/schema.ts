@@ -11,6 +11,10 @@ export interface paths {
   "/me": {
     get: operations["me"];
   };
+  "/posts": {
+    get: operations["get_posts_by_user_id"];
+    post: operations["create_post"];
+  };
   "/signup": {
     post: operations["signup"];
   };
@@ -29,6 +33,16 @@ export interface components {
     readonly LoginCredential: {
       readonly name: string;
       readonly password: string;
+    };
+    readonly NewPost: {
+      readonly content: string;
+    };
+    readonly Post: {
+      readonly content: string;
+      readonly id: string;
+      /** Format: date-time */
+      readonly published_at: string;
+      readonly user_id: string;
     };
     readonly SignupCredential: {
       /** @example alice */
@@ -60,7 +74,7 @@ export interface operations {
     };
     responses: {
       /** @description Successfully logged in */
-      200: never;
+      204: never;
       /** @description Unauthorized */
       401: {
         content: {
@@ -97,6 +111,51 @@ export interface operations {
       };
     };
   };
+  get_posts_by_user_id: {
+    responses: {
+      /** @description Successfully get posts for a user */
+      200: {
+        content: {
+          readonly "application/json": readonly (components["schemas"]["Post"])[];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
+  create_post: {
+    readonly requestBody: {
+      readonly content: {
+        readonly "application/json": components["schemas"]["NewPost"];
+      };
+    };
+    responses: {
+      /** @description Successfully created a post */
+      204: never;
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
   signup: {
     readonly requestBody: {
       readonly content: {
@@ -105,7 +164,7 @@ export interface operations {
     };
     responses: {
       /** @description Successfully created a new user */
-      200: never;
+      204: never;
       /** @description InternalServerError */
       500: {
         content: {

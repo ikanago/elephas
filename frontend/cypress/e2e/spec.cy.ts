@@ -1,4 +1,8 @@
-import { describe, it } from "mocha";
+import { after, describe, it } from "mocha";
+
+after(() => {
+    cy.resetState();
+});
 
 describe("sign up", () => {
     beforeEach(() => {
@@ -98,4 +102,31 @@ describe("log in", () => {
         cy.getAllCookies().should("have.length", 0);
         cy.get(".error").should("have.text", "User name or password is wrong.");
     });
+});
+
+describe("post", () => {
+    before(() => {
+        cy.resetState();
+        cy.signupUser("cat", "pass");
+    });
+
+    it("create", () => {
+        // arrange
+        cy.intercept("POST", "/api/posts").as("createPost");
+        cy.intercept("GET", "/api/posts").as("getPosts");
+
+        // act
+        cy.visit("/");
+        cy.get('input[name="content"]').type("hello");
+        cy.get('input[type="submit"]').click();
+        cy.wait("@createPost");
+        cy.wait("@getPosts");
+
+        // assert
+        cy.location("pathname").should("eq", "/");
+        cy.get(".timeline").should("have.length", 1);
+        cy.get(".timeline").get(".post").should("have.text", "hello");
+    });
+
+    // TODO: test there is an error when logged out
 });

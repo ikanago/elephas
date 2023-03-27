@@ -26,7 +26,7 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "204": {
             "description": "Successfully logged in"
           },
           "401": {
@@ -92,6 +92,90 @@
         }
       }
     },
+    "/posts": {
+      "get": {
+        "tags": [
+          "self::post"
+        ],
+        "operationId": "get_posts_by_user_id",
+        "responses": {
+          "200": {
+            "description": "Successfully get posts for a user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Post"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "self::post"
+        ],
+        "operationId": "create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewPost"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successfully created a post"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/signup": {
       "post": {
         "tags": [
@@ -109,7 +193,7 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "204": {
             "description": "Successfully created a new user"
           },
           "500": {
@@ -200,6 +284,41 @@
             "type": "string"
           },
           "password": {
+            "type": "string"
+          }
+        }
+      },
+      "NewPost": {
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "content",
+          "published_at"
+        ],
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_id": {
             "type": "string"
           }
         }

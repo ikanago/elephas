@@ -4,18 +4,18 @@ const api = import.meta.env.DEV
     ? "http://localhost:5173/api"
     : "http://localhost:3000/api";
 
-export type ResponseGet<P extends keyof paths> = paths[P] extends { get: infer Get }
-    ? Get extends { responses: infer Statuses }
-        ? {
-            [K in keyof Statuses]:
-                Statuses[K] extends { content: infer Content }
-                    ? Content extends { "application/json": infer Data }
-                        ? { status: K, data: Data }
-                        : { status: K }
-                    : never;
-        }[keyof Statuses]
-        : never
-    : never; 
+type ResponseOperation<Op> = Op extends { responses: infer Statuses }
+    ? {
+        [K in keyof Statuses]:
+            Statuses[K] extends { content: infer Content }
+                ? Content extends { "application/json": infer Data }
+                    ? { status: K, data: Data }
+                    : { status: K }
+                : never;
+    }[keyof Statuses]
+    : never;
+
+export type ResponseGet<P extends keyof paths> = paths[P] extends { get: infer Get } ? ResponseOperation<Get> : never;
 
 type Payload<P extends keyof paths> = paths[P] extends { post: infer Post }
     ? Post extends 
@@ -29,18 +29,7 @@ type Payload<P extends keyof paths> = paths[P] extends { post: infer Post }
         ? Body : undefined
     : undefined;
 
-export type ResponsePost<P extends keyof paths> = paths[P] extends { post: infer Post }
-    ? Post extends { responses: infer Statuses }
-        ? {
-            [K in keyof Statuses]:
-                Statuses[K] extends { content: infer Content }
-                    ? Content extends { "application/json": infer Response }
-                        ? { status: K, data: Response }
-                        : { status: K }
-                    : never;
-        }[keyof Statuses]
-        : never
-    : never; 
+export type ResponsePost<P extends keyof paths> = paths[P] extends { post: infer Post } ? ResponseOperation<Post> : never;
 
 const get = <P extends keyof paths>(path: P) => async (): Promise<ResponseGet<P>> => {
     const res = await fetch(`${api}${path}`, {

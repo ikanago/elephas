@@ -1,4 +1,8 @@
-import { describe, it } from "mocha";
+import { after, describe, it } from "mocha";
+
+after(() => {
+    cy.resetState();
+});
 
 describe("sign up", () => {
     beforeEach(() => {
@@ -123,4 +127,6 @@ describe("post", () => {
         cy.get(".timeline").should("have.length", 1);
         cy.get(".timeline").get(".post").should("have.text", "hello");
     });
+
+    // TODO: test there is an error when logged out
 });

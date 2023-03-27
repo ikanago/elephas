@@ -116,7 +116,7 @@ export interface operations {
       /** @description Successfully get posts for a user */
       200: {
         content: {
-          readonly "application/json": ReadonlyArray<components["schemas"]["Post"]>;
+          readonly "application/json": readonly (components["schemas"]["Post"])[];
         };
       };
       /** @description Unauthorized */

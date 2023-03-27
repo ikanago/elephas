@@ -15,7 +15,7 @@ bcrypt = "0.14.0"
 chrono = { version = "0.4.24", default-features = false, features = ["clock", "std", "serde"] }
 dotenvy = "0.15.7"
 rand = "0.8.5"
-reqwest = { version = "0.11.15", features = ["json"] }
+reqwest = { version = "0.11.16", features = ["json"] }
 rsa = { version = "0.8.2", features = ["sha2"] }
 serde = { version = "1.0.158", features = ["derive"] }
 serde_json = "1.0.94"

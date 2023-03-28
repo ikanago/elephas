@@ -9,7 +9,8 @@ use uuid::Uuid;
 
 use crate::{
     error::ServiceError,
-    model::post::{Post, PostRepository}, SESSION_KEY,
+    model::post::{Post, PostRepository},
+    SESSION_KEY,
 };
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]

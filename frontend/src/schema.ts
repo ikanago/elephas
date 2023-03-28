@@ -19,7 +19,7 @@ export interface paths {
     post: operations["signup"];
   };
   "/users/{name}": {
-    get: operations["user_info"];
+    get: operations["user_profile"];
   };
 }
 
@@ -50,7 +50,7 @@ export interface components {
       /** @example password */
       readonly password: string;
     };
-    readonly UserInfoResponse: {
+    readonly UserProfile: {
       /** @example alice */
       readonly name: string;
     };
@@ -94,7 +94,7 @@ export interface operations {
       /** @description Successfully fetched user info */
       200: {
         content: {
-          readonly "application/json": components["schemas"]["UserInfoResponse"];
+          readonly "application/json": components["schemas"]["UserProfile"];
         };
       };
       /** @description Unauthorized */
@@ -173,7 +173,7 @@ export interface operations {
       };
     };
   };
-  user_info: {
+  user_profile: {
     parameters: {
       readonly path: {
         name: string;
@@ -183,7 +183,7 @@ export interface operations {
       /** @description Successfully fetched user info */
       200: {
         content: {
-          readonly "application/json": components["schemas"]["UserInfoResponse"];
+          readonly "application/json": components["schemas"]["UserProfile"];
         };
       };
       /** @description BadRequest */

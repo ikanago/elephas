@@ -51,11 +51,11 @@ async fn user_info_service(
         return user_info_activity_json(pool, host_name, name).await;
     }
 
-    let stored_user_id = session
-        .get::<String>("user_id")
+    let stored_user_name = session
+        .get::<String>("user_name")
         .map_err(|_| ServiceError::InternalServerError)?
         .ok_or(ServiceError::WrongCredential)?;
-    let user = pool.get_user_by_id(&stored_user_id).await.unwrap();
+    let user = pool.get_user_by_name(&stored_user_name).await.unwrap();
     if name != user.name {
         return Err(ServiceError::WrongCredential);
     }
@@ -70,7 +70,7 @@ async fn user_info_activity_json(
     name: &str,
 ) -> crate::Result<web::Json<Value>> {
     let user = pool.get_user_by_name(&name).await?;
-    let key_pair = pool.get_key_pair_by_user_id(user.id).await?;
+    let key_pair = pool.get_key_pair_by_user_name(user.name).await?;
 
     Ok(web::Json(json!({
         "@context": [
@@ -118,9 +118,9 @@ mod tests {
         signup_service(&pool, regstration, session.clone())
             .await
             .unwrap();
-        let user_id = pool.get_user_by_name(&name).await.unwrap().id;
+        let user_name = pool.get_user_by_name(&name).await.unwrap().name;
 
-        session.insert("user_id", user_id).unwrap();
+        session.insert("user_name", user_name).unwrap();
 
         // act
         let res = user_info_service(
@@ -152,9 +152,9 @@ mod tests {
         signup_service(&pool, regstration, session.clone())
             .await
             .unwrap();
-        let first_user_id = pool.get_user_by_name(&first_user_name).await.unwrap().id;
+        let first_user_name = pool.get_user_by_name(&first_user_name).await.unwrap().name;
 
-        session.insert("user_id", first_user_id).unwrap();
+        session.insert("user_name", first_user_name).unwrap();
 
         // act
         let res =

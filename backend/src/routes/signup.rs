@@ -4,13 +4,10 @@ use crate::{
 };
 use actix_session::Session;
 use actix_web::{post, web, HttpResponse, Responder};
-use rand::Rng;
 use serde::Deserialize;
 use sqlx::PgPool;
 use tracing::info;
 use utoipa::ToSchema;
-
-const ID_LEN: usize = 16;
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct SignupCredential {
@@ -47,17 +44,15 @@ pub async fn signup_service(
     }
 
     let user = User {
-        id: generate_id(ID_LEN),
         name: name.to_string(),
         password_hash: hash_password(&password),
     };
     info!(user = ?user);
-    pool.save_user(user).await?;
-    let user = pool.get_user_by_name(&name).await?;
+    pool.save_user(user.clone()).await?;
 
     let (private_key, public_key) = generate_key_pair().unwrap();
     let key_pair = KeyPair {
-        user_id: user.id.clone(),
+        user_name: user.name.clone(),
         private_key,
         public_key,
     };
@@ -65,18 +60,10 @@ pub async fn signup_service(
     pool.save_key_pair(key_pair).await.unwrap();
 
     session
-        .insert("user_id", user.id.clone())
-        .expect("user ID is must be serializable");
-    info!("Create a session for the user {}.", user.id);
+        .insert("user_name", user.name.clone())
+        .expect("user name must be serializable");
+    info!("Create a session for the user {}.", user.name);
     Ok(HttpResponse::NoContent().finish())
-}
-
-fn generate_id(len: usize) -> String {
-    rand::thread_rng()
-        .sample_iter(rand::distributions::Alphanumeric)
-        .take(len)
-        .map(char::from)
-        .collect()
 }
 
 fn hash_password(password: &str) -> String {

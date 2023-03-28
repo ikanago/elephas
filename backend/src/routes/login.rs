@@ -43,9 +43,9 @@ async fn login_service(
     session.renew();
     info!("Renew the session");
     session
-        .insert("user_id", user.id.clone())
-        .expect("user ID is must be serializable");
-    info!("Create a session for the user {}.", user.id);
+        .insert("user_name", user.name.clone())
+        .expect("user name must be serializable");
+    info!("Create a session for the user {}.", user.name);
     Ok(HttpResponse::NoContent().finish())
 }
 

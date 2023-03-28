@@ -29,11 +29,11 @@ pub async fn me(pool: web::Data<PgPool>, session: Session) -> impl Responder {
 
 async fn me_service(pool: &PgPool, session: Session) -> crate::Result<impl Responder> {
     // TODO: extract session validation
-    let stored_user_id = session
-        .get::<String>("user_id")
+    let stored_user_name = session
+        .get::<String>("user_name")
         .map_err(|_| ServiceError::InternalServerError)?
         .ok_or(ServiceError::WrongCredential)?;
-    let user = pool.get_user_by_id(&stored_user_id).await.unwrap();
+    let user = pool.get_user_by_name(&stored_user_name).await.unwrap();
     info!(user = ?user);
 
     let res = UserInfoResponse { name: user.name };

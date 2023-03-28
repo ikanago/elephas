@@ -42,7 +42,7 @@ export interface components {
       readonly id: string;
       /** Format: date-time */
       readonly published_at: string;
-      readonly user_id: string;
+      readonly user_name: string;
     };
     readonly SignupCredential: {
       /** @example alice */

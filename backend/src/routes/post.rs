@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{
     error::ServiceError,
-    model::post::{Post, PostRepository},
+    model::post::{Post, PostRepository}, SESSION_KEY,
 };
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]
@@ -41,7 +41,7 @@ async fn create_post_service(
     session: Session,
 ) -> crate::Result<impl Responder> {
     let user_name = session
-        .get::<String>("user_name")
+        .get::<String>(SESSION_KEY)
         .map_err(|_| ServiceError::InternalServerError)?
         .ok_or(ServiceError::WrongCredential)?;
     let post = Post {
@@ -68,7 +68,7 @@ pub async fn get_posts_by_user_id(
     session: Session,
 ) -> crate::Result<impl Responder> {
     let user_name = session
-        .get::<String>("user_name")
+        .get::<String>(SESSION_KEY)
         .map_err(|_| ServiceError::InternalServerError)?
         .ok_or(ServiceError::WrongCredential)?;
     let posts = pool.get_posts_by_user_name(&user_name).await.unwrap();

@@ -1,6 +1,6 @@
 use crate::{
     error::ServiceError,
-    model::{KeyPairRepository, UserRepository},
+    model::{KeyPairRepository, UserRepository}, SESSION_KEY,
 };
 use actix_session::Session;
 use actix_web::{get, http::header::Accept, web, Responder};
@@ -52,7 +52,7 @@ async fn user_info_service(
     }
 
     let stored_user_name = session
-        .get::<String>("user_name")
+        .get::<String>(SESSION_KEY)
         .map_err(|_| ServiceError::InternalServerError)?
         .ok_or(ServiceError::WrongCredential)?;
     let user = pool.get_user_by_name(&stored_user_name).await.unwrap();
@@ -120,7 +120,7 @@ mod tests {
             .unwrap();
         let user_name = pool.get_user_by_name(&name).await.unwrap().name;
 
-        session.insert("user_name", user_name).unwrap();
+        session.insert(SESSION_KEY, user_name).unwrap();
 
         // act
         let res = user_info_service(
@@ -154,7 +154,7 @@ mod tests {
             .unwrap();
         let first_user_name = pool.get_user_by_name(&first_user_name).await.unwrap().name;
 
-        session.insert("user_name", first_user_name).unwrap();
+        session.insert(SESSION_KEY, first_user_name).unwrap();
 
         // act
         let res =

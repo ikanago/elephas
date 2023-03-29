@@ -130,3 +130,36 @@ describe("post", () => {
 
     // TODO: test there is an error when logged out
 });
+
+describe("user profile", () => {
+    before(() => {
+        cy.resetState();
+        cy.signupUser("cat", "pass");
+    });
+
+    it("get successfully", () => {
+        // arrange
+        cy.intercept("GET", "/api/users/cat").as("getUserProfile");
+
+        // act
+        cy.visit("/users/cat");
+        cy.wait("@getUserProfile");
+
+        // assert
+        cy.location("pathname").should("eq", "/users/cat");
+        cy.get("p").should("have.text", "cat");
+    });
+
+    it("not found for non-existing user", () => {
+        // arrange
+        cy.intercept("GET", "/api/users/caaaaat").as("getUserProfile");
+
+        // act
+        cy.visit("/users/caaaaat");
+        cy.wait("@getUserProfile");
+
+        // assert
+        cy.location("pathname").should("eq", "/users/caaaaat");
+        cy.get("p").should("have.text", "Not found");
+    });
+});

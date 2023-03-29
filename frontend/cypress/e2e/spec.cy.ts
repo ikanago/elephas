@@ -51,7 +51,7 @@ describe("sign up", () => {
 
         // assert
         cy.location("pathname").should("eq", "/signup");
-        cy.get(".error").should("have.text", "The user name is already used.");
+        cy.get(".error").should("have.text", "The user name is already used");
     });
 });
 
@@ -100,7 +100,7 @@ describe("log in", () => {
         // assert
         cy.location("pathname").should("eq", "/login");
         cy.getAllCookies().should("have.length", 0);
-        cy.get(".error").should("have.text", "User name or password is wrong.");
+        cy.get(".error").should("have.text", "User name or password is wrong");
     });
 });
 
@@ -147,7 +147,7 @@ describe("user profile", () => {
 
         // assert
         cy.location("pathname").should("eq", "/users/cat");
-        cy.get("p").should("have.text", "cat");
+        cy.get(".name").should("have.text", "cat");
     });
 
     it("not found for non-existing user", () => {
@@ -161,5 +161,33 @@ describe("user profile", () => {
         // assert
         cy.location("pathname").should("eq", "/users/caaaaat");
         cy.get("p").should("have.text", "Not found");
+    });
+});
+
+describe("follow", () => {
+    before(() => {
+        cy.resetState();
+        cy.signupUser("dog", "pass");
+        cy.clearAllCookies();
+        cy.signupUser("cat", "pass");
+    });
+
+    it("successfully", () => {
+        // arrange
+        cy.intercept("POST", "/api/follow").as("follow");
+
+        // act
+        cy.visit("/users/dog");
+        cy.get('button').click();
+        cy.wait("@follow");
+
+        // assert
+        cy.location("pathname").should("eq", "/users/dog");
+        cy.get(".followees").should("have.text", "0 follows")
+        cy.get(".followers").should("have.text", "1 followers")
+
+        cy.visit("/users/cat");
+        cy.get(".followees").should("have.text", "1 follows")
+        cy.get(".followers").should("have.text", "0 followers")
     });
 });

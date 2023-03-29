@@ -105,3 +105,9 @@ export const createPost = post("/posts");
 export const getPostsOfMe = get("/posts");
 
 export const getUserProfile = get("/users/{name}");
+
+export const createFollow = post("/follow");
+
+export const getFollowees = get("/followees/{name}");
+
+export const getFollowers = get("/followers/{name}");

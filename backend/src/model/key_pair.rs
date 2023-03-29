@@ -69,6 +69,12 @@ impl KeyPairRepository for PgPool {
 const BITS: usize = 2048;
 
 pub fn generate_key_pair() -> crate::Result<(String, String)> {
+    if let Ok(env) = std::env::var("ENV") {
+        if env == "test" {
+            return Ok((String::new(), String::new()));
+        }
+    }
+
     let private_key = RsaPrivateKey::new(&mut thread_rng(), BITS).expect("private key is created successfully; error is generated when nprimes < 2, but nprimes is 2.");
     let public_key = RsaPublicKey::from(&private_key);
     let private_key_pem = private_key

@@ -7,7 +7,7 @@ use utoipa::ToSchema;
 #[derive(Clone, Debug, Serialize, Deserialize, ToSchema)]
 pub struct Post {
     pub id: String,
-    pub user_id: String,
+    pub user_name: String,
     pub content: String,
     pub published_at: DateTime<Utc>,
 }
@@ -15,7 +15,7 @@ pub struct Post {
 #[async_trait]
 pub trait PostRepository {
     async fn save_post(&self, post: Post) -> crate::Result<()>;
-    async fn get_posts_by_user_id(&self, user_id: &str) -> crate::Result<Vec<Post>>;
+    async fn get_posts_by_user_name(&self, user_id: &str) -> crate::Result<Vec<Post>>;
 }
 
 #[async_trait]
@@ -23,7 +23,7 @@ impl PostRepository for PgPool {
     async fn save_post(&self, post: Post) -> crate::Result<()> {
         sqlx::query!(
             r#"
-            INSERT INTO posts ("id", "user_id", "content", "published_at")
+            INSERT INTO posts ("id", "user_name", "content", "published_at")
             VALUES (
                 $1,
                 $2,
@@ -32,7 +32,7 @@ impl PostRepository for PgPool {
             )
             "#,
             post.id,
-            post.user_id,
+            post.user_name,
             post.content,
             post.published_at
         )
@@ -41,13 +41,13 @@ impl PostRepository for PgPool {
         Ok(())
     }
 
-    async fn get_posts_by_user_id(&self, user_id: &str) -> crate::Result<Vec<Post>> {
+    async fn get_posts_by_user_name(&self, user_name: &str) -> crate::Result<Vec<Post>> {
         let posts = sqlx::query_as!(
             Post,
             r#"
-            SELECT * FROM posts WHERE user_id = $1
+            SELECT * FROM posts WHERE user_name = $1
             "#,
-            user_id
+            user_name
         )
         .fetch_all(self)
         .await?;

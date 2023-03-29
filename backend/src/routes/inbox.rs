@@ -47,7 +47,7 @@ async fn inbox_service(
         // TODO: assuming remote inbox URL.
         let target_inbox = format!("{}/inbox", body.actor);
 
-        let key_pair = pool.get_key_pair_by_user_id(user.id).await?;
+        let key_pair = pool.get_key_pair_by_user_name(user.name).await?;
         let headers = sign_headers(&payload, &target_inbox, &key_pair.private_key)?;
 
         let client = reqwest::Client::new();

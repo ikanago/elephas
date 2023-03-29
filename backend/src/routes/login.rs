@@ -1,4 +1,4 @@
-use crate::{error::ServiceError, model::UserRepository};
+use crate::{error::ServiceError, model::UserRepository, SESSION_KEY};
 use actix_session::Session;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::Deserialize;
@@ -43,9 +43,9 @@ async fn login_service(
     session.renew();
     info!("Renew the session");
     session
-        .insert("user_id", user.id.clone())
-        .expect("user ID is must be serializable");
-    info!("Create a session for the user {}.", user.id);
+        .insert(SESSION_KEY, user.name.clone())
+        .expect("user name must be serializable");
+    info!("Create a session for the user {}.", user.name);
     Ok(HttpResponse::NoContent().finish())
 }
 

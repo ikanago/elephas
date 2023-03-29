@@ -64,7 +64,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserInfoResponse"
+                  "$ref": "#/components/schemas/UserProfile"
                 }
               }
             }
@@ -212,9 +212,9 @@
     "/users/{name}": {
       "get": {
         "tags": [
-          "self::user_info"
+          "self::user_profile"
         ],
-        "operationId": "user_info",
+        "operationId": "user_profile",
         "parameters": [
           {
             "name": "name",
@@ -231,7 +231,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserInfoResponse"
+                  "$ref": "#/components/schemas/UserProfile"
                 }
               }
             }
@@ -303,7 +303,7 @@
         "type": "object",
         "required": [
           "id",
-          "user_id",
+          "user_name",
           "content",
           "published_at"
         ],
@@ -318,7 +318,7 @@
             "type": "string",
             "format": "date-time"
           },
-          "user_id": {
+          "user_name": {
             "type": "string"
           }
         }
@@ -340,7 +340,7 @@
           }
         }
       },
-      "UserInfoResponse": {
+      "UserProfile": {
         "type": "object",
         "required": [
           "name"

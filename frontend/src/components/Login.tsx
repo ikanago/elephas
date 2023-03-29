@@ -10,7 +10,6 @@ const Login = () => {
 
     const submit = async () => {
         const res = await login({ name, password });
-        console.log(res);
         if (res.status === 204) {
             navigate("/");
         } else {

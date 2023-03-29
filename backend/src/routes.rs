@@ -1,6 +1,7 @@
 use actix_web::{get, web, Responder, Scope};
 use utoipa::OpenApi;
 
+mod follow;
 mod host_meta;
 mod inbox;
 mod login;
@@ -18,7 +19,10 @@ pub fn routing() -> Scope {
         .service(self::me::me)
         .service(self::user_profile::user_profile)
         .service(self::post::create_post)
-        .service(self::post::get_posts_by_user_id)
+        .service(self::post::get_posts_by_user_name)
+        .service(self::follow::create_follow)
+        .service(self::follow::get_followees_by_user_name)
+        .service(self::follow::get_followers_by_user_name)
         .service(self::inbox::inbox)
         .service(self::webfinger::webfinger)
         .service(self::host_meta::host_meta)
@@ -41,7 +45,10 @@ async fn ping() -> impl Responder {
         self::me::me,
         self::user_profile::user_profile,
         self::post::create_post,
-        self::post::get_posts_by_user_id,
+        self::post::get_posts_by_user_name,
+        self::follow::create_follow,
+        self::follow::get_followees_by_user_name,
+        self::follow::get_followers_by_user_name,
     ),
     components(schemas(
         self::signup::SignupCredential,
@@ -49,7 +56,8 @@ async fn ping() -> impl Responder {
         crate::service::user_profile::UserProfile,
         self::post::NewPost,
         crate::model::post::Post,
-        crate::error::ErrorMessage
+        self::follow::NewFollow,
+        crate::error::ErrorMessage,
     ))
 )]
 pub struct ApiDoc;

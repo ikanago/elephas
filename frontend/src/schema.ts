@@ -5,6 +5,15 @@
 
 
 export interface paths {
+  "/follow": {
+    post: operations["create_follow"];
+  };
+  "/followees/{name}": {
+    get: operations["get_followees_by_user_name"];
+  };
+  "/followers/{name}": {
+    get: operations["get_followers_by_user_name"];
+  };
   "/login": {
     post: operations["login"];
   };
@@ -12,7 +21,7 @@ export interface paths {
     get: operations["me"];
   };
   "/posts": {
-    get: operations["get_posts_by_user_id"];
+    get: operations["get_posts_by_user_name"];
     post: operations["create_post"];
   };
   "/signup": {
@@ -33,6 +42,9 @@ export interface components {
     readonly LoginCredential: {
       readonly name: string;
       readonly password: string;
+    };
+    readonly NewFollow: {
+      readonly follow_to_name: string;
     };
     readonly NewPost: {
       readonly content: string;
@@ -66,6 +78,83 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  create_follow: {
+    readonly requestBody: {
+      readonly content: {
+        readonly "application/json": components["schemas"]["NewFollow"];
+      };
+    };
+    responses: {
+      /** @description Successfully follow the user */
+      204: never;
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
+  get_followees_by_user_name: {
+    parameters: {
+      readonly path: {
+        name: string;
+      };
+    };
+    responses: {
+      /** @description Successfully get followees for a user */
+      200: {
+        content: {
+          readonly "application/json": readonly (components["schemas"]["UserProfile"])[];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
+  get_followers_by_user_name: {
+    parameters: {
+      readonly path: {
+        name: string;
+      };
+    };
+    responses: {
+      /** @description Successfully get followers for a user */
+      200: {
+        content: {
+          readonly "application/json": readonly (components["schemas"]["UserProfile"])[];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
   login: {
     readonly requestBody: {
       readonly content: {
@@ -111,7 +200,7 @@ export interface operations {
       };
     };
   };
-  get_posts_by_user_id: {
+  get_posts_by_user_name: {
     responses: {
       /** @description Successfully get posts for a user */
       200: {

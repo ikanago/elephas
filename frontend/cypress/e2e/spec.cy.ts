@@ -179,14 +179,14 @@ describe("follow", () => {
 
         // act
         cy.visit("/users/dog");
-        cy.get("button").click();
+        cy.get(".follow").click();
         cy.wait("@follow");
 
         // assert
         cy.location("pathname").should("eq", "/users/dog");
         cy.get(".followees").should("have.text", "0 follows");
         cy.get(".followers").should("have.text", "1 followers");
-        cy.get("button").should("have.text", "Unfollow");
+        cy.get(".unfollow").should("have.text", "Unfollow");
 
         cy.visit("/users/cat");
         cy.get(".followees").should("have.text", "1 follows");
@@ -194,14 +194,14 @@ describe("follow", () => {
 
         // act
         cy.visit("/users/dog");
-        cy.get("button").click();
+        cy.get(".unfollow").click();
         cy.wait("@unfollow");
 
         // assert
         cy.location("pathname").should("eq", "/users/dog");
         cy.get(".followees").should("have.text", "0 follows");
         cy.get(".followers").should("have.text", "0 followers");
-        cy.get("button").should("have.text", "Follow");
+        cy.get(".follow").should("have.text", "Follow");
 
         cy.visit("/users/cat");
         cy.get(".followees").should("have.text", "0 follows");

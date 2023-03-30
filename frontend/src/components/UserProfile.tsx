@@ -58,17 +58,25 @@ const UserProfile = () => {
                         {followers?.status === 200 ? followers?.data.length : 0}{" "}
                         followers
                     </p>
-                    <button
-                        onClick={() => {
-                            if (isFollowing) {
+                    {isFollowing ? (
+                        <button
+                            className="unfollow"
+                            onClick={() => {
                                 unfollow().catch(console.error);
-                            } else {
+                            }}
+                        >
+                            Unfollow
+                        </button>
+                    ) : (
+                        <button
+                            className="follow"
+                            onClick={() => {
                                 follow().catch(console.error);
-                            }
-                        }}
-                    >
-                        {isFollowing ? "Unfollow" : "Follow"}
-                    </button>
+                            }}
+                        >
+                            Follow
+                        </button>
+                    )}
                 </>
             ) : (
                 <p>Not found</p>

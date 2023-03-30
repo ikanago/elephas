@@ -164,7 +164,7 @@ describe("user profile", () => {
     });
 });
 
-describe.only("follow", () => {
+describe("follow", () => {
     beforeEach(() => {
         cy.resetState();
         cy.signupUser("dog", "pass");
@@ -175,10 +175,11 @@ describe.only("follow", () => {
     it("successfully", () => {
         // arrange
         cy.intercept("POST", "/api/follow").as("follow");
+        cy.intercept("DELETE", "/api/follow").as("unfollow");
 
         // act
         cy.visit("/users/dog");
-        cy.get('button').click();
+        cy.get("button").click();
         cy.wait("@follow");
 
         // assert
@@ -190,18 +191,10 @@ describe.only("follow", () => {
         cy.visit("/users/cat");
         cy.get(".followees").should("have.text", "1 follows");
         cy.get(".followers").should("have.text", "0 followers");
-    });
-
-    it("remove successfully", () => {
-        // arrange
-        cy.intercept("POST", "/api/follow").as("follow");
-        cy.intercept("DELETE", "/api/follow").as("unfollow");
 
         // act
         cy.visit("/users/dog");
-        cy.get('button').click();
-        cy.wait("@follow");
-        cy.get('button').click();
+        cy.get("button").click();
         cy.wait("@unfollow");
 
         // assert

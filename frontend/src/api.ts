@@ -26,6 +26,12 @@ export type ResponsePost<P extends keyof paths> = paths[P] extends {
     ? ResponseOperation<Post>
     : never;
 
+export type ResponseDelete<P extends keyof paths> = paths[P] extends {
+    delete: infer Delete;
+}
+    ? ResponseOperation<Delete>
+    : never;
+
 type Parameters<P extends keyof paths> = paths[P] extends { get: infer Get }
     ? Get extends { parameters: infer Params }
         ? Params extends { path: infer Path }
@@ -46,7 +52,7 @@ type Payload<P extends keyof paths> = paths[P] extends { post: infer Post }
         : undefined
     : undefined;
 
-const get =
+const apiGet =
     <P extends keyof paths>(path: P) =>
     async (params?: Parameters<P>): Promise<ResponseGet<P>> => {
         let replacedPath;
@@ -69,7 +75,7 @@ const get =
         return response;
     };
 
-const post =
+const apiPost =
     <P extends keyof paths>(path: P) =>
     async (payload: Payload<P>): Promise<ResponsePost<P>> => {
         const res = await fetch(`${api}${path}`, {
@@ -94,20 +100,47 @@ const post =
         } as unknown as ResponsePost<P>;
     };
 
-export const me = get("/me");
+const apiDelete =
+    <P extends keyof paths>(path: P) =>
+    async (payload: Payload<P>): Promise<ResponseDelete<P>> => {
+        const res = await fetch(`${api}${path}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
 
-export const signup = post("/signup");
+        if (res.status === 204) {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            return {
+                status: res.status,
+            } as ResponseDelete<P>;
+        }
 
-export const login = post("/login");
+        const data = await res.json();
+        return {
+            status: res.status,
+            data,
+        } as unknown as ResponseDelete<P>;
+    };
 
-export const createPost = post("/posts");
+export const me = apiGet("/me");
 
-export const getPostsOfMe = get("/posts");
+export const signup = apiPost("/signup");
 
-export const getUserProfile = get("/users/{name}");
+export const login = apiPost("/login");
 
-export const createFollow = post("/follow");
+export const createPost = apiPost("/posts");
 
-export const getFollowees = get("/followees/{name}");
+export const getPostsOfMe = apiGet("/posts");
 
-export const getFollowers = get("/followers/{name}");
+export const getUserProfile = apiGet("/users/{name}");
+
+export const createFollow = apiPost("/follow");
+
+export const deleteFollow = apiDelete("/follow");
+
+export const getFollowees = apiGet("/followees/{name}");
+
+export const getFollowers = apiGet("/followers/{name}");

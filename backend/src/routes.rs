@@ -21,6 +21,7 @@ pub fn routing() -> Scope {
         .service(self::post::create_post)
         .service(self::post::get_posts_by_user_name)
         .service(self::follow::create_follow)
+        .service(self::follow::delete_follow)
         .service(self::follow::get_followees_by_user_name)
         .service(self::follow::get_followers_by_user_name)
         .service(self::inbox::inbox)
@@ -47,6 +48,7 @@ async fn ping() -> impl Responder {
         self::post::create_post,
         self::post::get_posts_by_user_name,
         self::follow::create_follow,
+        self::follow::delete_follow,
         self::follow::get_followees_by_user_name,
         self::follow::get_followers_by_user_name,
     ),
@@ -56,7 +58,7 @@ async fn ping() -> impl Responder {
         crate::service::user_profile::UserProfile,
         self::post::NewPost,
         crate::model::post::Post,
-        self::follow::NewFollow,
+        crate::model::follow::Follow,
         crate::error::ErrorMessage,
     ))
 )]

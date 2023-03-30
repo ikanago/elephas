@@ -2,8 +2,9 @@ use super::User;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use utoipa::ToSchema;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, ToSchema)]
 pub struct Follow {
     pub follow_from_name: String,
     pub follow_to_name: String,
@@ -12,6 +13,7 @@ pub struct Follow {
 #[async_trait]
 pub trait FollowRepository {
     async fn save_follow(&self, follow: Follow) -> crate::Result<()>;
+    async fn delete_follow(&self, follow: Follow) -> crate::Result<()>;
     async fn get_followers_by_name(&self, follow_from_name: &str) -> crate::Result<Vec<User>>;
     async fn get_followees_by_name(&self, follow_to_name: &str) -> crate::Result<Vec<User>>;
 }
@@ -26,6 +28,20 @@ impl FollowRepository for PgPool {
                 $1,
                 $2
             )
+            "#,
+            follow.follow_from_name,
+            follow.follow_to_name
+        )
+        .execute(self)
+        .await?;
+        Ok(())
+    }
+
+    async fn delete_follow(&self, follow: Follow) -> crate::Result<()> {
+        sqlx::query!(
+            r#"
+            DELETE FROM follows
+            WHERE follow_from_name = $1 AND follow_to_name = $2
             "#,
             follow.follow_from_name,
             follow.follow_to_name

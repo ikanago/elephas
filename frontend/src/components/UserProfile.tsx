@@ -1,7 +1,11 @@
 import { useParams } from "react-router-dom";
-import { createFollow, getFollowees, getFollowers } from "../api";
-import { useUser } from "../hooks";
-import useSWR from "swr";
+import { createFollow, deleteFollow } from "../api";
+import {
+    useFollers as useFollewers,
+    useFollowees,
+    useMe,
+    useUser,
+} from "../hooks";
 
 const UserProfile = () => {
     const { name } = useParams();
@@ -10,18 +14,33 @@ const UserProfile = () => {
     if (user?.status === 200) {
         userName = user.data.name;
     }
-    const { data: followees, mutate: mutateFollowees } = useSWR(
-        ["/api/followees/{name}", userName],
-        async ([_, name]) => await getFollowees({ name })
-    );
-    const { data: followers, mutate: mutateFollowers } = useSWR(
-        ["/api/followers/{name}", userName],
-        async ([_, name]) => await getFollowers({ name })
-    );
+    const { res: followees, mutate: mutateFollowees } = useFollowees(userName);
+    const { res: followers, mutate: mutateFollowers } = useFollewers(userName);
+
+    const me = useMe();
+    let isFollowing = false;
+    if (followers?.status === 200 && me?.status === 200) {
+        isFollowing = followers.data.some(
+            follower => follower.name === me.data.name
+        );
+    }
 
     const follow = async () => {
-        if (user?.status !== 200) return;
-        await createFollow({ follow_to_name: userName });
+        if (user?.status !== 200 || me?.status !== 200) return;
+        await createFollow({
+            follow_from_name: me.data.name,
+            follow_to_name: userName,
+        });
+        await mutateFollowees();
+        await mutateFollowers();
+    };
+
+    const unfollow = async () => {
+        if (user?.status !== 200 || me?.status !== 200) return;
+        await deleteFollow({
+            follow_from_name: me.data.name,
+            follow_to_name: userName,
+        });
         await mutateFollowees();
         await mutateFollowers();
     };
@@ -41,10 +60,14 @@ const UserProfile = () => {
                     </p>
                     <button
                         onClick={() => {
-                            follow().catch(console.error);
+                            if (isFollowing) {
+                                unfollow().catch(console.error);
+                            } else {
+                                follow().catch(console.error);
+                            }
                         }}
                     >
-                        Follow
+                        {isFollowing ? "Unfollow" : "Follow"}
                     </button>
                 </>
             ) : (

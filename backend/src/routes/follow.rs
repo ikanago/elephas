@@ -1,9 +1,7 @@
 use actix_session::Session;
-use actix_web::{get, post, web, HttpResponse, Responder};
-use serde::Deserialize;
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use sqlx::PgPool;
 use tracing::debug;
-use utoipa::ToSchema;
 
 use crate::{
     error::ServiceError,
@@ -15,13 +13,8 @@ use crate::{
     SESSION_KEY,
 };
 
-#[derive(Clone, Debug, Deserialize, ToSchema)]
-pub struct NewFollow {
-    pub follow_to_name: String,
-}
-
 #[utoipa::path(
-    request_body = NewFollow,
+    request_body = Follow,
     responses(
         (status = 204, description = "Successfully follow the user"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
@@ -32,7 +25,7 @@ pub struct NewFollow {
 #[tracing::instrument(skip(pool, session))]
 pub async fn create_follow(
     pool: web::Data<PgPool>,
-    body: web::Json<NewFollow>,
+    body: web::Json<Follow>,
     session: Session,
 ) -> crate::Result<impl Responder> {
     create_follow_service(pool.as_ref(), body.into_inner(), session).await
@@ -40,7 +33,10 @@ pub async fn create_follow(
 
 async fn create_follow_service(
     pool: &PgPool,
-    NewFollow { follow_to_name }: NewFollow,
+    Follow {
+        follow_from_name,
+        follow_to_name,
+    }: Follow,
     session: Session,
 ) -> crate::Result<impl Responder> {
     let user_name = session
@@ -48,15 +44,47 @@ async fn create_follow_service(
         .map_err(|_| ServiceError::InternalServerError)?
         .ok_or(ServiceError::WrongCredential)?;
 
+    if user_name != follow_from_name {
+        return Err(ServiceError::WrongCredential);
+    }
+
     if pool.get_user_by_name(&follow_to_name).await.is_err() {
         return Err(ServiceError::UserNotFound);
     }
 
     let follow = Follow {
-        follow_from_name: user_name,
+        follow_from_name,
         follow_to_name,
     };
     pool.save_follow(follow).await?;
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[utoipa::path(
+    request_body = Follow,
+    responses(
+        (status = 204, description = "Successfully remove the user"),
+        (status = 401, body = ErrorMessage, description = "Unauthorized"),
+        (status = 500, body = ErrorMessage, description = "InternalServerError"),
+    )
+)]
+#[delete("/follow")]
+#[tracing::instrument(skip(pool, session))]
+pub async fn delete_follow(
+    pool: web::Data<PgPool>,
+    body: web::Json<Follow>,
+    session: Session,
+) -> crate::Result<impl Responder> {
+    let user_name = session
+        .get::<String>(SESSION_KEY)
+        .map_err(|_| ServiceError::InternalServerError)?
+        .ok_or(ServiceError::WrongCredential)?;
+
+    if user_name != body.follow_from_name {
+        return Err(ServiceError::WrongCredential);
+    }
+
+    pool.delete_follow(body.into_inner()).await?;
     Ok(HttpResponse::NoContent().finish())
 }
 

@@ -164,8 +164,8 @@ describe("user profile", () => {
     });
 });
 
-describe("follow", () => {
-    before(() => {
+describe.only("follow", () => {
+    beforeEach(() => {
         cy.resetState();
         cy.signupUser("dog", "pass");
         cy.clearAllCookies();
@@ -183,11 +183,35 @@ describe("follow", () => {
 
         // assert
         cy.location("pathname").should("eq", "/users/dog");
-        cy.get(".followees").should("have.text", "0 follows")
-        cy.get(".followers").should("have.text", "1 followers")
+        cy.get(".followees").should("have.text", "0 follows");
+        cy.get(".followers").should("have.text", "1 followers");
+        cy.get("button").should("have.text", "Unfollow");
 
         cy.visit("/users/cat");
-        cy.get(".followees").should("have.text", "1 follows")
-        cy.get(".followers").should("have.text", "0 followers")
+        cy.get(".followees").should("have.text", "1 follows");
+        cy.get(".followers").should("have.text", "0 followers");
+    });
+
+    it("remove successfully", () => {
+        // arrange
+        cy.intercept("POST", "/api/follow").as("follow");
+        cy.intercept("DELETE", "/api/follow").as("unfollow");
+
+        // act
+        cy.visit("/users/dog");
+        cy.get('button').click();
+        cy.wait("@follow");
+        cy.get('button').click();
+        cy.wait("@unfollow");
+
+        // assert
+        cy.location("pathname").should("eq", "/users/dog");
+        cy.get(".followees").should("have.text", "0 follows");
+        cy.get(".followers").should("have.text", "0 followers");
+        cy.get("button").should("have.text", "Follow");
+
+        cy.visit("/users/cat");
+        cy.get(".followees").should("have.text", "0 follows");
+        cy.get(".followers").should("have.text", "0 followers");
     });
 });

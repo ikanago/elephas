@@ -19,7 +19,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewFollow"
+                "$ref": "#/components/schemas/Follow"
               }
             }
           },
@@ -28,6 +28,47 @@
         "responses": {
           "204": {
             "description": "Successfully follow the user"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "self::follow"
+        ],
+        "operationId": "delete_follow",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Follow"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successfully remove the user"
           },
           "401": {
             "description": "Unauthorized",
@@ -422,6 +463,21 @@
           }
         }
       },
+      "Follow": {
+        "type": "object",
+        "required": [
+          "follow_from_name",
+          "follow_to_name"
+        ],
+        "properties": {
+          "follow_from_name": {
+            "type": "string"
+          },
+          "follow_to_name": {
+            "type": "string"
+          }
+        }
+      },
       "LoginCredential": {
         "type": "object",
         "required": [
@@ -433,17 +489,6 @@
             "type": "string"
           },
           "password": {
-            "type": "string"
-          }
-        }
-      },
-      "NewFollow": {
-        "type": "object",
-        "required": [
-          "follow_to_name"
-        ],
-        "properties": {
-          "follow_to_name": {
             "type": "string"
           }
         }

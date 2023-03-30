@@ -7,6 +7,7 @@
 export interface paths {
   "/follow": {
     post: operations["create_follow"];
+    delete: operations["delete_follow"];
   };
   "/followees/{name}": {
     get: operations["get_followees_by_user_name"];
@@ -39,12 +40,13 @@ export interface components {
     readonly ErrorMessage: {
       readonly error: string;
     };
+    readonly Follow: {
+      readonly follow_from_name: string;
+      readonly follow_to_name: string;
+    };
     readonly LoginCredential: {
       readonly name: string;
       readonly password: string;
-    };
-    readonly NewFollow: {
-      readonly follow_to_name: string;
     };
     readonly NewPost: {
       readonly content: string;
@@ -81,11 +83,34 @@ export interface operations {
   create_follow: {
     readonly requestBody: {
       readonly content: {
-        readonly "application/json": components["schemas"]["NewFollow"];
+        readonly "application/json": components["schemas"]["Follow"];
       };
     };
     responses: {
       /** @description Successfully follow the user */
+      204: never;
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
+  delete_follow: {
+    readonly requestBody: {
+      readonly content: {
+        readonly "application/json": components["schemas"]["Follow"];
+      };
+    };
+    responses: {
+      /** @description Successfully remove the user */
       204: never;
       /** @description Unauthorized */
       401: {

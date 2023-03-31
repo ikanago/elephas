@@ -10,7 +10,7 @@
         "e2e": "npm run build && start-server-and-test start:backend 'http-get://localhost:3000/api/ping' cy:run",
         "fix": "eslint --fix src/ && prettier --write src/",
         "schema": "cargo run --manifest-path=../backend/Cargo.toml --bin gen_schema -- ../schema.json && openapi-typescript ../schema.json --output src/schema.ts --immutable-types",
-        "start:backend": "ENV=dev cargo run --manifest-path=../backend/Cargo.toml --bin app",
+        "start:backend": "ENV=dev cargo run --manifest-path=../backend/Cargo.toml --bin app --release",
         "reset-db": "pushd ../backend && sqlx database drop -y && sqlx database create && sqlx migrate run && popd"
     },
     "dependencies": {

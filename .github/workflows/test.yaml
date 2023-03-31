@@ -41,21 +41,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Cache dependencies
-        # Skip on pull requests created by renovate because these PRs occupies the cache volume.
-        if: github.actor != 'renovate[bot]'
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: backend -> target
-
-      - name: Setup Postgresql
-        run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
-
-      - name: Build and test
-        run: |
-          cargo build --locked --verbose --release
-          cargo test --verbose --release
-
       - name: Cache frontend dependencies
         if: github.actor != 'renovate[bot]'
         uses: actions/cache@v3
@@ -82,6 +67,21 @@ jobs:
           # Without `-n`, `echo -n "$diff" | wc -l` is 1 even if `"$diff" is empty.`
           test $(echo -n "$diff" | wc -l) -eq 0
         working-directory: frontend
+
+      - name: Cache dependencies
+        # Skip on pull requests created by renovate because these PRs occupies the cache volume.
+        if: github.actor != 'renovate[bot]'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend -> target
+
+      - name: Setup Postgresql
+        run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
+
+      - name: Build and test
+        run: |
+          cargo build --bin app --locked --verbose --release
+          cargo test --lib --verbose --release
 
       - uses: cypress-io/github-action@v5
         with:

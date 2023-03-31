@@ -51,6 +51,9 @@ jobs:
       - name: Setup Postgresql
         run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
 
+      - name: Build(test)
+        run: cargo test --lib --verbose --release --no-run
+
       - name: Build and test
         run: |
           cargo build --locked --verbose --release

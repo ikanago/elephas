@@ -127,6 +127,8 @@ const apiDelete =
 
 export const me = apiGet("/me");
 
+export const updateMe = apiPost("/me");
+
 export const signup = apiPost("/signup");
 
 export const login = apiPost("/login");

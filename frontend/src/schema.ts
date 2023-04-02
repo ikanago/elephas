@@ -234,6 +234,11 @@ export interface operations {
     };
   };
   update_me: {
+    readonly requestBody: {
+      readonly content: {
+        readonly "application/json": components["schemas"]["UserProfileUpdate"];
+      };
+    };
     responses: {
       /** @description Successfully update user profile */
       204: never;

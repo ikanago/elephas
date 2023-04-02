@@ -154,6 +154,10 @@ describe("user profile", () => {
         cy.signupUser("cat", "pass");
     });
 
+    beforeEach(() => {
+        cy.loginUser("cat", "pass");
+    });
+
     it("get successfully", () => {
         // arrange
         cy.intercept("GET", "/api/users/cat").as("getUserProfile");
@@ -178,6 +182,55 @@ describe("user profile", () => {
         // assert
         cy.location("pathname").should("eq", "/users/caaaaat");
         cy.get("p").should("have.text", "Not found");
+    });
+
+    it("edit successfully", () => {
+        // arrange
+        cy.intercept("GET", "/api/users/cat").as("getUserProfile");
+        cy.intercept("POST", "/api/me").as("updateMe");
+
+        // act
+        cy.visit("/users/cat");
+        cy.wait("@getUserProfile");
+        cy.get(".edit").click();
+
+        // assert
+        cy.location("pathname").should("eq", "/settings/profile");
+
+        // act
+        const displayName = "meow";
+        const description = "I'm a cat";
+        const avatarUrl = "https://placekitten.com/200/300";
+        cy.get('input[name="displayName"]').type(displayName);
+        cy.get('input[name="description"]').type(description);
+        cy.get('input[name="avatarUrl"]').type(avatarUrl);
+        cy.get('input[type="submit"]').click();
+        cy.wait("@updateMe");
+
+        // assert
+        cy.location("pathname").should("eq", "/");
+
+        // act
+        cy.visit("/users/cat");
+        cy.wait("@getUserProfile");
+
+        // assert
+        cy.get(".displayName").should("have.text", displayName);
+        cy.get(".description").should("have.text", description);
+        cy.get(".avatarUrl").should("have.text", avatarUrl);
+    });
+
+    it("failes editing by users other than the logged in user", () => {
+        // arrange
+        cy.intercept("GET", "/api/users/dog").as("getUserProfile");
+
+        // act
+        cy.visit("/users/dog");
+        cy.wait("@getUserProfile");
+
+        // assert
+        cy.location("pathname").should("eq", "/users/dog");
+        cy.get(".edit").should("not.exist");
     });
 });
 

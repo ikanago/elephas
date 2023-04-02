@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { createFollow, deleteFollow } from "../api";
 import {
     useFollers as useFollewers,
@@ -47,9 +47,11 @@ const UserProfile = () => {
 
     return (
         <div>
-            {user?.status === 200 ? (
+            {user?.status === 200 && me?.status === 200 ? (
                 <>
                     <p className="name">{user.data.name}</p>
+                    <p className="displayName">{user.data.display_name}</p>
+                    <p className="avatarUrl">{user.data.avatar_url}</p>
                     <p className="followees">
                         {followees?.status === 200 ? followees?.data.length : 0}{" "}
                         follows
@@ -77,6 +79,19 @@ const UserProfile = () => {
                             Follow
                         </button>
                     )}
+                    <p className="description">{user.data.description}</p>
+                    <Link
+                        to="/settings/profile"
+                        className="edit"
+                        style={{
+                            display:
+                                user.data.name !== me?.data.name
+                                    ? "none"
+                                    : undefined,
+                        }}
+                    >
+                        Edit Profile
+                    </Link>
                 </>
             ) : (
                 <p>Not found</p>

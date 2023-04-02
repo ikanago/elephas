@@ -46,6 +46,8 @@ pub async fn signup_service(
     let user = User {
         name: name.to_string(),
         password_hash: hash_password(&password),
+        description: String::new(),
+        avatar_url: String::new(),
     };
     info!(user = ?user);
     pool.save_user(user.clone()).await?;

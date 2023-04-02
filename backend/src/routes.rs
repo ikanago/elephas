@@ -63,6 +63,9 @@ async fn ping() -> impl Responder {
         crate::model::post::Post,
         crate::model::follow::Follow,
         crate::error::ErrorMessage,
-    ))
+    )),
+    servers(
+        (url = "http://localhost:3000/api", description = "Localhost"),
+    )
 )]
 pub struct ApiDoc;

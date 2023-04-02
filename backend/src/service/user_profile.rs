@@ -7,9 +7,13 @@ use crate::model::{User, UserRepository};
 
 #[derive(Clone, Debug, Serialize, ToSchema)]
 pub struct UserProfile {
+    #[schema(example = "alice")]
     pub name: String,
+    #[schema(example = "Alice")]
     pub display_name: String,
+    #[schema(example = "I am Alice.")]
     pub description: String,
+    #[schema(example = "https://example.com/avatar.png")]
     pub avatar_url: String,
 }
 

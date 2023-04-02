@@ -53,10 +53,15 @@ export interface components {
       readonly content: string;
     };
     readonly Post: {
+      /** @example Hello, world! */
       readonly content: string;
       readonly id: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time 
+       * @example 2021-01-01T00:00:00Z
+       */
       readonly published_at: string;
+      /** @example alice */
       readonly user_name: string;
     };
     readonly SignupCredential: {
@@ -66,9 +71,13 @@ export interface components {
       readonly password: string;
     };
     readonly UserProfile: {
+      /** @example https://example.com/avatar.png */
       readonly avatar_url: string;
+      /** @example I am Alice. */
       readonly description: string;
+      /** @example Alice */
       readonly display_name: string;
+      /** @example alice */
       readonly name: string;
     };
     readonly UserProfileUpdate: {
@@ -136,7 +145,7 @@ export interface operations {
   };
   get_followees_by_user_name: {
     parameters: {
-      readonly path: {
+      path: {
         name: string;
       };
     };
@@ -163,7 +172,7 @@ export interface operations {
   };
   get_followers_by_user_name: {
     parameters: {
-      readonly path: {
+      path: {
         name: string;
       };
     };
@@ -320,7 +329,7 @@ export interface operations {
   };
   user_profile: {
     parameters: {
-      readonly path: {
+      path: {
         name: string;
       };
     };

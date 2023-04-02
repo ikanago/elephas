@@ -1,8 +1,9 @@
 import { type paths } from "./schema";
 
-const api = import.meta.env.DEV
-    ? "http://localhost:5173/api"
-    : "http://localhost:3000/api";
+// const api = import.meta.env.DEV
+//     ? "http://localhost:5173/api"
+//     : "http://localhost:3000/api";
+const api = "http://localhost:3000/api";
 
 type ResponseOperation<Op> = Op extends { responses: infer Statuses }
     ? {

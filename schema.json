@@ -8,6 +8,12 @@
     },
     "version": "0.1.0"
   },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Localhost"
+    }
+  ],
   "paths": {
     "/follow": {
       "post": {
@@ -555,17 +561,20 @@
         ],
         "properties": {
           "content": {
-            "type": "string"
+            "type": "string",
+            "example": "Hello, world!"
           },
           "id": {
             "type": "string"
           },
           "published_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2021-01-01T00:00:00Z"
           },
           "user_name": {
-            "type": "string"
+            "type": "string",
+            "example": "alice"
           }
         }
       },
@@ -596,16 +605,20 @@
         ],
         "properties": {
           "avatar_url": {
-            "type": "string"
+            "type": "string",
+            "example": "https://example.com/avatar.png"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "example": "I am Alice."
           },
           "display_name": {
-            "type": "string"
+            "type": "string",
+            "example": "Alice"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "example": "alice"
           }
         }
       },

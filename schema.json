@@ -280,6 +280,37 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "self::me"
+        ],
+        "operationId": "update_me",
+        "responses": {
+          "204": {
+            "description": "Successfully update user profile"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/posts": {
@@ -402,7 +433,7 @@
     "/users/{name}": {
       "get": {
         "tags": [
-          "self::user_profile"
+          "self::users"
         ],
         "operationId": "user_profile",
         "parameters": [
@@ -548,12 +579,42 @@
       "UserProfile": {
         "type": "object",
         "required": [
-          "name"
+          "name",
+          "display_name",
+          "description",
+          "avatar_url"
         ],
         "properties": {
+          "avatar_url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
           "name": {
-            "type": "string",
-            "example": "alice"
+            "type": "string"
+          }
+        }
+      },
+      "UserProfileUpdate": {
+        "type": "object",
+        "required": [
+          "display_name",
+          "description",
+          "avatar_url"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
           }
         }
       }

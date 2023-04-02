@@ -20,6 +20,7 @@ export interface paths {
   };
   "/me": {
     get: operations["me"];
+    post: operations["update_me"];
   };
   "/posts": {
     get: operations["get_posts_by_user_name"];
@@ -65,8 +66,15 @@ export interface components {
       readonly password: string;
     };
     readonly UserProfile: {
-      /** @example alice */
+      readonly avatar_url: string;
+      readonly description: string;
+      readonly display_name: string;
       readonly name: string;
+    };
+    readonly UserProfileUpdate: {
+      readonly avatar_url: string;
+      readonly description: string;
+      readonly display_name: string;
     };
   };
   responses: never;
@@ -211,6 +219,24 @@ export interface operations {
           readonly "application/json": components["schemas"]["UserProfile"];
         };
       };
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
+  update_me: {
+    responses: {
+      /** @description Successfully update user profile */
+      204: never;
       /** @description Unauthorized */
       401: {
         content: {

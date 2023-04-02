@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS "users" (
     "name" TEXT PRIMARY KEY,
     "password_hash" TEXT NOT NULL,
+    "display_name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "avatar_url" TEXT NOT NULL
 );

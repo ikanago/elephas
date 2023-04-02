@@ -105,7 +105,7 @@ pub async fn get_followees_by_user_name(
         .get_followees_by_name(&user_name)
         .await?
         .into_iter()
-        .map(|user| UserProfile { name: user.name })
+        .map(|user| UserProfile::from(user))
         .collect::<Vec<_>>();
     debug!(folloees = ?folloees);
     Ok(HttpResponse::Ok().json(folloees))
@@ -128,7 +128,7 @@ pub async fn get_followers_by_user_name(
         .get_followers_by_name(&user_name)
         .await?
         .into_iter()
-        .map(|user| UserProfile { name: user.name })
+        .map(|user| UserProfile::from(user))
         .collect::<Vec<_>>();
     debug!(folloers = ?folloers);
     Ok(HttpResponse::Ok().json(folloers))

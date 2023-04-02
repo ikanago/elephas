@@ -102,6 +102,23 @@ describe("log in", () => {
         cy.getAllCookies().should("have.length", 0);
         cy.get(".error").should("have.text", "User name or password is wrong");
     });
+
+    it("failes with unregistered user name", () => {
+        // arrange
+        cy.intercept("POST", "/api/login").as("login");
+
+        // act
+        cy.visit("/login");
+        cy.get('input[name="username"]').type("caaaaaat");
+        cy.get('input[name="password"]').type(password);
+        cy.get('input[type="submit"]').click();
+        cy.wait("@login");
+
+        // assert
+        cy.location("pathname").should("eq", "/login");
+        cy.getAllCookies().should("have.length", 0);
+        cy.get(".error").should("have.text", "The user is not found");
+    });
 });
 
 describe("post", () => {

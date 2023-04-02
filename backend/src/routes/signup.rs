@@ -67,7 +67,11 @@ pub async fn signup_service(
 }
 
 fn hash_password(password: &str) -> String {
-    bcrypt::hash(password, bcrypt::DEFAULT_COST).expect("password successfully hashed")
+    let cost = match std::env::var("ENV") {
+        Ok(env) if env == "dev" => 4,
+        _ => bcrypt::DEFAULT_COST,
+    };
+    bcrypt::hash(password, cost).expect("password successfully hashed")
 }
 
 #[cfg(test)]

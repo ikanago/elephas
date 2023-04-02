@@ -19,3 +19,12 @@ CREATE TABLE IF NOT EXISTS "posts" (
 
     FOREIGN KEY (user_name) REFERENCES users(name) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS "follows" (
+    "follow_from_name" TEXT NOT NULL,
+    "follow_to_name" TEXT NOT NULL,
+
+    PRIMARY KEY (follow_from_name, follow_to_name),
+    FOREIGN KEY (follow_from_name) REFERENCES users(name) ON DELETE CASCADE,
+    FOREIGN KEY (follow_to_name) REFERENCES users(name) ON DELETE CASCADE
+)

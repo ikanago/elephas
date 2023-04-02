@@ -29,6 +29,7 @@ declare global {
         interface Chainable {
             resetState(): Chainable<void>
             signupUser(username: string, password: string): Chainable<void>
+            loginUser(username: string, password: string): Chainable<void>
         }
     }
 }
@@ -40,6 +41,10 @@ Cypress.Commands.add("resetState", () => {
 
 Cypress.Commands.add("signupUser", (username: string, password: string) => {
     cy.request("POST", "/api/signup", { name: username, password: password }).as("signup");
+});
+
+Cypress.Commands.add("loginUser", (username: string, password: string) => {
+    cy.request("POST", "/api/login", { name: username, password: password }).as("login");
 });
 
 export {};

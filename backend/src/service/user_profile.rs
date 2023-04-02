@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 
 use crate::model::UserRepository;
 
-#[derive(Clone, Serialize, ToSchema)]
+#[derive(Clone, Debug, Serialize, ToSchema)]
 pub struct UserProfile {
     #[schema(example = "alice")]
     pub name: String,

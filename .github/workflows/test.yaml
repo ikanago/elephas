@@ -42,6 +42,8 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Cache dependencies
+        # Skip on pull requests created by renovate because these PRs occupies the cache volume.
+        if: github.actor != 'renovate[bot]'
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: backend -> target
@@ -49,12 +51,16 @@ jobs:
       - name: Setup Postgresql
         run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
 
+      - name: Build(test)
+        run: cargo test --lib --verbose --release --no-run
+
       - name: Build and test
         run: |
-          cargo build --locked --verbose
-          cargo test --verbose
+          cargo build --locked --verbose --release
+          cargo test --lib --verbose --release
 
       - name: Cache frontend dependencies
+        if: github.actor != 'renovate[bot]'
         uses: actions/cache@v3
         with:
           path: |
@@ -99,6 +105,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Cache dependencies
+        if: github.actor != 'renovate[bot]'
         uses: actions/cache@v3
         with:
           path: |

@@ -1,5 +1,11 @@
 import useSWR from "swr";
-import { getPostsOfMe, getUserProfile, me } from "./api";
+import {
+    getFollowees,
+    getFollowers,
+    getPostsOfMe,
+    getUserProfile,
+    me,
+} from "./api";
 
 export const useMe = () => {
     const { data } = useSWR("/api/me", me);
@@ -14,10 +20,23 @@ export const useUser = (name: string) => {
     return data;
 };
 
+export const useFollowees = (name: string) => {
+    const { data, mutate } = useSWR(
+        name !== "" ? ["/api/followees/{name}", name] : undefined,
+        async ([_, name]) => await getFollowees({ name })
+    );
+    return { res: data, mutate };
+};
+
+export const useFollers = (name: string) => {
+    const { data, mutate } = useSWR(
+        name !== "" ? ["/api/followers/{name}", name] : undefined,
+        async ([_, name]) => await getFollowers({ name })
+    );
+    return { res: data, mutate };
+};
+
 export const useMyPosts = () => {
     const { data, mutate } = useSWR("/api/posts", getPostsOfMe);
-    return {
-        res: data,
-        mutate,
-    };
+    return { res: data, mutate };
 };

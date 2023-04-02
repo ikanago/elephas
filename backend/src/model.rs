@@ -1,3 +1,4 @@
+pub mod follow;
 pub mod key_pair;
 pub mod post;
 pub mod user;

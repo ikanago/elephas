@@ -64,10 +64,11 @@ async fn create_post_service(
 )]
 #[get("/posts")]
 #[tracing::instrument(skip(pool, session))]
-pub async fn get_posts_by_user_id(
+pub async fn get_posts_by_user_name(
     pool: web::Data<PgPool>,
     session: Session,
 ) -> crate::Result<impl Responder> {
+    // TODO: this retrieves posts from user logging in, but it should be able to retrieve posts from any user.
     let user_name = session
         .get::<String>(SESSION_KEY)
         .map_err(|_| ServiceError::InternalServerError)?

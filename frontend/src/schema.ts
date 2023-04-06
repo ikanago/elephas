@@ -20,6 +20,7 @@ export interface paths {
   };
   "/me": {
     get: operations["me"];
+    post: operations["update_me"];
   };
   "/posts": {
     get: operations["get_posts_by_user_name"];
@@ -52,10 +53,15 @@ export interface components {
       readonly content: string;
     };
     readonly Post: {
+      /** @example Hello, world! */
       readonly content: string;
       readonly id: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time 
+       * @example 2021-01-01T00:00:00Z
+       */
       readonly published_at: string;
+      /** @example alice */
       readonly user_name: string;
     };
     readonly SignupCredential: {
@@ -65,8 +71,19 @@ export interface components {
       readonly password: string;
     };
     readonly UserProfile: {
+      /** @example https://example.com/avatar.png */
+      readonly avatar_url: string;
+      /** @example I am Alice. */
+      readonly description: string;
+      /** @example Alice */
+      readonly display_name: string;
       /** @example alice */
       readonly name: string;
+    };
+    readonly UserProfileUpdate: {
+      readonly avatar_url: string;
+      readonly description: string;
+      readonly display_name: string;
     };
   };
   responses: never;
@@ -128,7 +145,7 @@ export interface operations {
   };
   get_followees_by_user_name: {
     parameters: {
-      readonly path: {
+      path: {
         name: string;
       };
     };
@@ -155,7 +172,7 @@ export interface operations {
   };
   get_followers_by_user_name: {
     parameters: {
-      readonly path: {
+      path: {
         name: string;
       };
     };
@@ -211,6 +228,29 @@ export interface operations {
           readonly "application/json": components["schemas"]["UserProfile"];
         };
       };
+      /** @description Unauthorized */
+      401: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+      /** @description InternalServerError */
+      500: {
+        content: {
+          readonly "application/json": components["schemas"]["ErrorMessage"];
+        };
+      };
+    };
+  };
+  update_me: {
+    readonly requestBody: {
+      readonly content: {
+        readonly "application/json": components["schemas"]["UserProfileUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successfully update user profile */
+      204: never;
       /** @description Unauthorized */
       401: {
         content: {
@@ -289,7 +329,7 @@ export interface operations {
   };
   user_profile: {
     parameters: {
-      readonly path: {
+      path: {
         name: string;
       };
     };

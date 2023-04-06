@@ -7,8 +7,11 @@ use utoipa::ToSchema;
 #[derive(Clone, Debug, Serialize, Deserialize, ToSchema)]
 pub struct Post {
     pub id: String,
+    #[schema(example = "alice")]
     pub user_name: String,
+    #[schema(example = "Hello, world!")]
     pub content: String,
+    #[schema(example = "2021-01-01T00:00:00Z")]
     pub published_at: DateTime<Utc>,
 }
 

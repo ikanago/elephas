@@ -1,10 +1,12 @@
 use crate::{
     model::{KeyPairRepository, UserRepository},
-    service::user_profile::user_profile_service,
+    service::user_profile::get_user_profile_service,
 };
 use actix_web::{get, http::header::Accept, web, Responder};
+use serde::Deserialize;
 use serde_json::{json, Value};
 use sqlx::PgPool;
+use utoipa::ToSchema;
 
 #[utoipa::path(
     responses(
@@ -24,7 +26,7 @@ async fn user_profile(
         return user_info_activity_json(&pool, &host_name, &user_name).await;
     }
 
-    let user = user_profile_service(&pool, &user_name).await?;
+    let user = get_user_profile_service(&pool, &user_name).await?;
     Ok(web::Json(json!(user)))
 }
 
@@ -58,6 +60,12 @@ async fn user_info_activity_json(
             "publicKeyPem": key_pair.public_key,
         },
     })))
+}
+
+#[derive(Debug, ToSchema, Deserialize)]
+pub struct UserProfileUpdate {
+    pub description: String,
+    pub avatar_url: String,
 }
 
 #[cfg(test)]

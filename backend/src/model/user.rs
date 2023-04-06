@@ -6,6 +6,9 @@ use sqlx::PgPool;
 pub struct User {
     pub name: String,
     pub password_hash: String,
+    pub display_name: String,
+    pub description: String,
+    pub avatar_url: String,
 }
 
 #[async_trait]
@@ -19,14 +22,26 @@ impl UserRepository for PgPool {
     async fn save_user(&self, user: User) -> crate::Result<()> {
         sqlx::query!(
             r#"
-            INSERT INTO users ("name", "password_hash")
+            INSERT INTO users ("name", "password_hash", "display_name", "description", "avatar_url")
             VALUES (
                 $1,
-                $2
+                $2,
+                $3,
+                $4,
+                $5
             )
+            ON CONFLICT ("name") DO UPDATE
+            SET
+                "password_hash" = EXCLUDED."password_hash",
+                "display_name" = EXCLUDED."display_name",
+                "description" = EXCLUDED."description",
+                "avatar_url" = EXCLUDED."avatar_url"
             "#,
             user.name,
-            user.password_hash
+            user.password_hash,
+            user.display_name,
+            user.description,
+            user.avatar_url
         )
         .execute(self)
         .await?;

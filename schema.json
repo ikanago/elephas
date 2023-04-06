@@ -8,6 +8,12 @@
     },
     "version": "0.1.0"
   },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Localhost"
+    }
+  ],
   "paths": {
     "/follow": {
       "post": {
@@ -280,6 +286,47 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "self::me"
+        ],
+        "operationId": "update_me",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successfully update user profile"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/posts": {
@@ -402,7 +449,7 @@
     "/users/{name}": {
       "get": {
         "tags": [
-          "self::user_profile"
+          "self::users"
         ],
         "operationId": "user_profile",
         "parameters": [
@@ -514,17 +561,20 @@
         ],
         "properties": {
           "content": {
-            "type": "string"
+            "type": "string",
+            "example": "Hello, world!"
           },
           "id": {
             "type": "string"
           },
           "published_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2021-01-01T00:00:00Z"
           },
           "user_name": {
-            "type": "string"
+            "type": "string",
+            "example": "alice"
           }
         }
       },
@@ -548,12 +598,46 @@
       "UserProfile": {
         "type": "object",
         "required": [
-          "name"
+          "name",
+          "display_name",
+          "description",
+          "avatar_url"
         ],
         "properties": {
+          "avatar_url": {
+            "type": "string",
+            "example": "https://example.com/avatar.png"
+          },
+          "description": {
+            "type": "string",
+            "example": "I am Alice."
+          },
+          "display_name": {
+            "type": "string",
+            "example": "Alice"
+          },
           "name": {
             "type": "string",
             "example": "alice"
+          }
+        }
+      },
+      "UserProfileUpdate": {
+        "type": "object",
+        "required": [
+          "display_name",
+          "description",
+          "avatar_url"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
           }
         }
       }

@@ -5,6 +5,7 @@ import Home from "./components/Home";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import UserProfile from "./components/UserProfile";
+import Settings from "./components/Settings";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
@@ -14,6 +15,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/users/:name" element={<UserProfile />} />
+                <Route path="/settings/profile" element={<Settings />} />
             </Routes>
         </BrowserRouter>
     </React.StrictMode>

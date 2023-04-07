@@ -600,17 +600,13 @@
         "required": [
           "name",
           "display_name",
-          "description",
+          "summary",
           "avatar_url"
         ],
         "properties": {
           "avatar_url": {
             "type": "string",
             "example": "https://example.com/avatar.png"
-          },
-          "description": {
-            "type": "string",
-            "example": "I am Alice."
           },
           "display_name": {
             "type": "string",
@@ -619,6 +615,10 @@
           "name": {
             "type": "string",
             "example": "alice"
+          },
+          "summary": {
+            "type": "string",
+            "example": "I am Alice."
           }
         }
       },
@@ -626,17 +626,17 @@
         "type": "object",
         "required": [
           "display_name",
-          "description",
+          "summary",
           "avatar_url"
         ],
         "properties": {
           "avatar_url": {
             "type": "string"
           },
-          "description": {
+          "display_name": {
             "type": "string"
           },
-          "display_name": {
+          "summary": {
             "type": "string"
           }
         }

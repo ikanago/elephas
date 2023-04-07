@@ -47,7 +47,7 @@ const UserProfile = () => {
 
     return (
         <div>
-            {user?.status === 200 && me?.status === 200 ? (
+            {user?.status === 200 ? (
                 <>
                     <p className="name">{user.data.name}</p>
                     <p className="displayName">{user.data.display_name}</p>
@@ -79,12 +79,13 @@ const UserProfile = () => {
                             Follow
                         </button>
                     )}
-                    <p className="description">{user.data.description}</p>
+                    <p className="summary">{user.data.summary}</p>
                     <Link
                         to="/settings/profile"
                         className="edit"
                         style={{
                             display:
+                                me?.status === 200 &&
                                 user.data.name !== me?.data.name
                                     ? "none"
                                     : undefined,

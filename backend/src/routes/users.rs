@@ -3,10 +3,8 @@ use crate::{
     service::user_profile::get_user_profile_service,
 };
 use actix_web::{get, http::header::Accept, web, Responder};
-use serde::Deserialize;
 use serde_json::{json, Value};
 use sqlx::PgPool;
-use utoipa::ToSchema;
 
 #[utoipa::path(
     responses(
@@ -16,6 +14,7 @@ use utoipa::ToSchema;
     )
 )]
 #[get("/users/{name}")]
+#[tracing::instrument(skip(pool, host_name))]
 async fn user_profile(
     pool: web::Data<PgPool>,
     host_name: web::Data<String>,
@@ -60,12 +59,6 @@ async fn user_info_activity_json(
             "publicKeyPem": key_pair.public_key,
         },
     })))
-}
-
-#[derive(Debug, ToSchema, Deserialize)]
-pub struct UserProfileUpdate {
-    pub description: String,
-    pub avatar_url: String,
 }
 
 #[cfg(test)]

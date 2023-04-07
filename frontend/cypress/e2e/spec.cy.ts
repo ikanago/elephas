@@ -199,10 +199,10 @@ describe("user profile", () => {
 
         // act
         const displayName = "meow";
-        const description = "I'm a cat";
+        const summary = "I'm a cat";
         const avatarUrl = "https://placekitten.com/200/300";
         cy.get('input[name="displayName"]').type(displayName);
-        cy.get('input[name="description"]').type(description);
+        cy.get('input[name="summary"]').type(summary);
         cy.get('input[name="avatarUrl"]').type(avatarUrl);
         cy.get('input[type="submit"]').click();
         cy.wait("@updateMe");
@@ -216,7 +216,7 @@ describe("user profile", () => {
 
         // assert
         cy.get(".displayName").should("have.text", displayName);
-        cy.get(".description").should("have.text", description);
+        cy.get(".summary").should("have.text", summary);
         cy.get(".avatarUrl").should("have.text", avatarUrl);
     });
 

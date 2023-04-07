@@ -7,7 +7,7 @@ pub struct User {
     pub name: String,
     pub password_hash: String,
     pub display_name: String,
-    pub description: String,
+    pub summary: String,
     pub avatar_url: String,
 }
 
@@ -22,7 +22,7 @@ impl UserRepository for PgPool {
     async fn save_user(&self, user: User) -> crate::Result<()> {
         sqlx::query!(
             r#"
-            INSERT INTO users ("name", "password_hash", "display_name", "description", "avatar_url")
+            INSERT INTO users ("name", "password_hash", "display_name", "summary", "avatar_url")
             VALUES (
                 $1,
                 $2,
@@ -34,13 +34,13 @@ impl UserRepository for PgPool {
             SET
                 "password_hash" = EXCLUDED."password_hash",
                 "display_name" = EXCLUDED."display_name",
-                "description" = EXCLUDED."description",
+                "summary" = EXCLUDED."summary",
                 "avatar_url" = EXCLUDED."avatar_url"
             "#,
             user.name,
             user.password_hash,
             user.display_name,
-            user.description,
+            user.summary,
             user.avatar_url
         )
         .execute(self)

@@ -4,6 +4,8 @@ use utoipa::ToSchema;
 
 #[derive(Debug, Error)]
 pub enum ServiceError {
+    #[error("{0}")]
+    BadRequest(String),
     #[error("The user name is already used")]
     NameAlreadyTaken,
     #[error("The user is not found")]
@@ -37,7 +39,8 @@ impl std::fmt::Display for ErrorMessage {
 impl ResponseError for ServiceError {
     fn status_code(&self) -> reqwest::StatusCode {
         match self {
-            ServiceError::NameAlreadyTaken
+            ServiceError::BadRequest(_)
+            | ServiceError::NameAlreadyTaken
             | ServiceError::UserNotFound
             | ServiceError::InvalidActivityPubRequest(_) => reqwest::StatusCode::BAD_REQUEST,
             ServiceError::WrongCredential => reqwest::StatusCode::UNAUTHORIZED,

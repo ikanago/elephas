@@ -73,17 +73,17 @@ export interface components {
     readonly UserProfile: {
       /** @example https://example.com/avatar.png */
       readonly avatar_url: string;
-      /** @example I am Alice. */
-      readonly description: string;
       /** @example Alice */
       readonly display_name: string;
       /** @example alice */
       readonly name: string;
+      /** @example I am Alice. */
+      readonly summary: string;
     };
     readonly UserProfileUpdate: {
       readonly avatar_url: string;
-      readonly description: string;
       readonly display_name: string;
+      readonly summary: string;
     };
   };
   responses: never;

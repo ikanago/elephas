@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
     const [displayName, setDisplayName] = useState("");
-    const [description, setDescription] = useState("");
+    const [summary, setDescription] = useState("");
     const [avatarUrl, setAvatarUrl] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
@@ -12,7 +12,7 @@ const Settings = () => {
     const submit = async () => {
         const res = await updateMe({
             display_name: displayName,
-            description,
+            summary,
             avatar_url: avatarUrl,
         });
         if (res.status === 204) {
@@ -38,8 +38,8 @@ const Settings = () => {
                     Description:
                     <input
                         type="text"
-                        name="description"
-                        value={description}
+                        name="summary"
+                        value={summary}
                         onChange={e => {
                             setDescription(e.target.value);
                         }}

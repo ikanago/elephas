@@ -1,0 +1,294 @@
+{
+  "db": "PostgreSQL",
+  "0d70bcb221be8e0079306a84da28672c23ecdd72b399869ffac6e650e5db487b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "summary",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "avatar_url",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM users WHERE name = $1\n            "
+  },
+  "175b6ffce2a3ab3207251099c41d38f0f1b57f7cdd8665935cf785647a8666da": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "summary",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "avatar_url",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            SELECT users.*\n            FROM users INNER JOIN follows ON users.name = follows.follow_to_name\n            WHERE follows.follow_from_name = $1\n            "
+  },
+  "348a862a9afafc153290787ccad009a26e366fec8b3a7b2a9cb4bf4d3510bfc0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            DELETE FROM follows\n            WHERE follow_from_name = $1 AND follow_to_name = $2\n            "
+  },
+  "36abce8a76e4da71b67684cbf3d086780e3bc8ee543fc567879a00381dd3be92": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "private_key",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "public_key",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM user_key_pair WHERE user_name = $1\n        "
+  },
+  "5fb39f3c8c7cbe8b76cf851df9b197b6a8902b99727a1567cab73e9c1ba114fc": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "user_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM posts WHERE user_name = $1\n            "
+  },
+  "9fc48c4d16ac6a97c14d585f44a531a0fd52b524e9bbe26a2fc55db5760e7f73": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO users (\"name\", \"password_hash\", \"display_name\", \"summary\", \"avatar_url\")\n            VALUES (\n                $1,\n                $2,\n                $3,\n                $4,\n                $5\n            )\n            ON CONFLICT (\"name\") DO UPDATE\n            SET\n                \"password_hash\" = EXCLUDED.\"password_hash\",\n                \"display_name\" = EXCLUDED.\"display_name\",\n                \"summary\" = EXCLUDED.\"summary\",\n                \"avatar_url\" = EXCLUDED.\"avatar_url\"\n            "
+  },
+  "a4894023bf6f495c547efdf53362c66187afc5754532d22c095407e3f6f59132": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO follows (\"follow_from_name\", \"follow_to_name\")\n            VALUES (\n                $1,\n                $2\n            )\n            "
+  },
+  "a8db592513fe239ed087a736219945f09c6b8bdd6d1fef2bc3032df63c1ff6fb": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO posts (\"id\", \"user_name\", \"content\", \"published_at\")\n            VALUES (\n                $1,\n                $2,\n                $3,\n                $4\n            )\n            "
+  },
+  "b9a23f64eb79583c32f2c7c8a207aada2d1667497e948d82b206b9f60dfedeba": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO user_key_pair (\"user_name\", \"private_key\", \"public_key\")\n            VALUES (\n                $1,\n                $2,\n                $3\n            )\n        "
+  },
+  "bafaa2151595c5e7e61bf7ea09144a56611692f84bdd731407e5fe50a8e1dd7e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "summary",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "avatar_url",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            SELECT users.*\n            FROM users INNER JOIN follows ON users.name = follows.follow_from_name\n            WHERE follows.follow_to_name = $1\n            "
+  },
+  "ff21a613d148601559298686711c85f43227eead95e63b525d5d3f2426d0e338": {
+    "describe": {
+      "columns": [
+        {
+          "name": "table_name",
+          "ordinal": 0,
+          "type_info": "Name"
+        }
+      ],
+      "nullable": [
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT table_name\n        FROM information_schema.tables\n        WHERE table_schema = 'public'\n            AND table_type = 'BASE TABLE'\n            AND table_name NOT LIKE '\\_%' ESCAPE '\\';"
+  }
+}

@@ -1,0 +1,7 @@
+cypress
+dist
+node_modules
+.env.*
+.eslint*
+.prettier*
+cypress.config.ts

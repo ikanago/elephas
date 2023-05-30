@@ -13,9 +13,6 @@ jobs:
     strategy:
       matrix:
         target: ["frontend", "backend"]
-    defaults:
-      run:
-        working-directory: ${{ matrix.target }}
 
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +42,7 @@ jobs:
         id: build-image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ${{ matrix.target }}
           file: Dockerfile
           push: true
           tags: ${{ steps.metadata.outputs.tags }}

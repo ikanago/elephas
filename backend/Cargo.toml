@@ -9,7 +9,7 @@ edition = "2021"
 actix-files = "0.6.2"
 actix-session = { version = "0.7.2", features = ["redis-actor-session"] }
 actix-web = "4.3.1"
-async-trait = "0.1.68"
+async-trait = "0.1.69"
 base64 = "0.21.2"
 bcrypt = "0.14.0"
 chrono = { version = "0.4.26", default-features = false, features = ["clock", "std", "serde"] }

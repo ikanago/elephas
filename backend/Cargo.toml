@@ -25,6 +25,6 @@ thiserror = "1.0.44"
 tracing = "0.1.38"
 tracing-actix-web = "0.7.5"
 tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
-utoipa = { version = "3.4.3", features = ["actix_extras", "chrono"] }
+utoipa = { version = "3.4.4", features = ["actix_extras", "chrono"] }
 uuid = "1.4.1"
 

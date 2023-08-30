@@ -37,7 +37,7 @@
         "eslint-plugin-react": "7.33.2",
         "eslint-plugin-unused-imports": "2.0.0",
         "mocha": "10.2.0",
-        "openapi-typescript": "6.5.1",
+        "openapi-typescript": "6.5.4",
         "prettier": "3.0.2",
         "start-server-and-test": "2.0.0",
         "typescript": "5.1.6",

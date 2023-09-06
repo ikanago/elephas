@@ -51,6 +51,8 @@ async fn main() {
             )
             .wrap(TracingLogger::default())
             .service(routing())
+            .service(backend::routes::webfinger::webfinger)
+            .service(backend::routes::host_meta::host_meta)
             .service(Files::new("/assets", "../frontend/dist/assets"))
             .service(
                 web::resource("/{_:.*}")

@@ -1,46 +1,38 @@
 {
-    "name": "frontend",
-    "private": true,
-    "version": "0.0.0",
-    "type": "module",
-    "scripts": {
-        "build": "tsc && vite build",
-        "cy:run": "cypress run -b chrome",
-        "dev": "vite",
-        "e2e": "npm run build && start-server-and-test start:backend 'http-get://localhost:3000/api/ping' cy:run",
-        "fix": "eslint --fix src/ && prettier --write src/",
-        "schema": "cargo run --manifest-path=../backend/Cargo.toml --bin gen_schema -- ../schema.json && openapi-typescript ../schema.json --output src/schema.ts --immutable-types",
-        "start:backend": "ENV=dev cargo run --manifest-path=../backend/Cargo.toml --bin app --release",
-        "start:mock": "docker run -p 3000:8000 --mount type=bind,src=`pwd`/../schema.json,dst=/schema.json danielgtaylor/apisprout --validate-server /schema.json",
-        "reset-db": "pushd ../backend && sqlx database drop -y && sqlx database create && sqlx migrate run && popd"
-    },
-    "dependencies": {
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "react-router-dom": "^6.8.2",
-        "swr": "^2.1.0"
-    },
-    "devDependencies": {
-        "@types/mocha": "10.0.1",
-        "@types/react": "18.2.21",
-        "@types/react-dom": "18.2.7",
-        "@typescript-eslint/eslint-plugin": "5.62.0",
-        "@typescript-eslint/parser": "5.62.0",
-        "@vitejs/plugin-react": "4.0.4",
-        "cypress": "13.1.0",
-        "eslint": "8.48.0",
-        "eslint-config-prettier": "9.0.0",
-        "eslint-config-standard-with-typescript": "37.0.0",
-        "eslint-plugin-import": "2.28.1",
-        "eslint-plugin-n": "16.0.2",
-        "eslint-plugin-promise": "6.1.1",
-        "eslint-plugin-react": "7.33.2",
-        "eslint-plugin-unused-imports": "2.0.0",
-        "mocha": "10.2.0",
-        "openapi-typescript": "6.5.4",
-        "prettier": "3.0.3",
-        "start-server-and-test": "2.0.0",
-        "typescript": "5.2.2",
-        "vite": "4.4.9"
-    }
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && vite build",
+    "build:test": "tsc && vite build --mode test",
+    "check": "biome check ./src/",
+    "cy:run": "cypress run -b chrome",
+    "dev": "vite",
+    "e2e": "npm run build:test && start-server-and-test start:backend 'http-get://localhost:3000/api/ping' cy:run",
+    "fix": "biome check --apply ./src/",
+    "schema": "cargo run --manifest-path=../backend/Cargo.toml --bin gen_schema -- ../schema.json && openapi-typescript ../schema.json --output src/schema.ts --immutable-types",
+    "start:backend": "ENV=dev cargo run --manifest-path=../backend/Cargo.toml --bin app --release",
+    "start:mock": "docker run -p 3000:8000 --rm --mount type=bind,src=`pwd`/../schema.json,dst=/schema.json danielgtaylor/apisprout --validate-server /schema.json",
+    "reset-db": "pushd ../backend && sqlx database drop -y && sqlx database create && sqlx migrate run && popd"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.2",
+    "swr": "^2.1.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.0.0",
+    "@types/mocha": "10.0.1",
+    "@types/react": "18.2.21",
+    "@types/react-dom": "18.2.7",
+    "@vitejs/plugin-react": "4.0.4",
+    "cypress": "13.1.0",
+    "mocha": "10.2.0",
+    "openapi-typescript": "6.5.4",
+    "start-server-and-test": "2.0.0",
+    "typescript": "5.2.2",
+    "vite": "4.4.9"
+  }
 }

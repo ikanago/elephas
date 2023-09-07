@@ -47,7 +47,7 @@ pub async fn signup_service(
         name: name.to_string(),
         password_hash: hash_password(&password),
         display_name: name.to_string(),
-        description: String::new(),
+        summary: String::new(),
         avatar_url: String::new(),
     };
     info!(user = ?user);

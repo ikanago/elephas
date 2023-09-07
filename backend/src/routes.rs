@@ -2,7 +2,11 @@ use actix_web::{get, web, Responder, Scope};
 use utoipa::OpenApi;
 
 mod follow;
-mod host_meta;
+// Make public to use directly in app.rs.
+// If this is served in `routing()` below, we have to prepend `web::scope("")` to the path.
+// This captures all requests other than those starting with `/api`.
+// Then we cannot serve all static files under `/`.
+pub mod host_meta;
 mod inbox;
 mod login;
 mod me;
@@ -10,7 +14,7 @@ mod post;
 mod reset_db;
 mod signup;
 mod users;
-mod webfinger;
+pub mod webfinger;
 
 pub fn routing() -> Scope {
     web::scope("/api")
@@ -26,8 +30,6 @@ pub fn routing() -> Scope {
         .service(self::follow::get_followees_by_user_name)
         .service(self::follow::get_followers_by_user_name)
         .service(self::inbox::inbox)
-        .service(self::webfinger::webfinger)
-        .service(self::host_meta::host_meta)
         .service(ping)
         // TODO: disable in production
         .service(self::reset_db::reset_db)
@@ -36,7 +38,7 @@ pub fn routing() -> Scope {
 #[get("/ping")]
 #[tracing::instrument]
 async fn ping() -> impl Responder {
-    "pong"
+    "pong\n"
 }
 
 #[derive(OpenApi)]

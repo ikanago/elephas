@@ -3,7 +3,6 @@
  * Do not make direct changes to the file.
  */
 
-
 export interface paths {
   "/follow": {
     post: operations["create_follow"];
@@ -57,7 +56,7 @@ export interface components {
       readonly content: string;
       readonly id: string;
       /**
-       * Format: date-time 
+       * Format: date-time
        * @example 2021-01-01T00:00:00Z
        */
       readonly published_at: string;
@@ -73,17 +72,17 @@ export interface components {
     readonly UserProfile: {
       /** @example https://example.com/avatar.png */
       readonly avatar_url: string;
-      /** @example I am Alice. */
-      readonly description: string;
       /** @example Alice */
       readonly display_name: string;
       /** @example alice */
       readonly name: string;
+      /** @example I am Alice. */
+      readonly summary: string;
     };
     readonly UserProfileUpdate: {
       readonly avatar_url: string;
-      readonly description: string;
       readonly display_name: string;
+      readonly summary: string;
     };
   };
   responses: never;
@@ -96,7 +95,6 @@ export interface components {
 export type external = Record<string, never>;
 
 export interface operations {
-
   create_follow: {
     readonly requestBody: {
       readonly content: {
@@ -153,7 +151,7 @@ export interface operations {
       /** @description Successfully get followees for a user */
       200: {
         content: {
-          readonly "application/json": readonly (components["schemas"]["UserProfile"])[];
+          readonly "application/json": readonly components["schemas"]["UserProfile"][];
         };
       };
       /** @description Unauthorized */
@@ -180,7 +178,7 @@ export interface operations {
       /** @description Successfully get followers for a user */
       200: {
         content: {
-          readonly "application/json": readonly (components["schemas"]["UserProfile"])[];
+          readonly "application/json": readonly components["schemas"]["UserProfile"][];
         };
       };
       /** @description Unauthorized */
@@ -270,7 +268,7 @@ export interface operations {
       /** @description Successfully get posts for a user */
       200: {
         content: {
-          readonly "application/json": readonly (components["schemas"]["Post"])[];
+          readonly "application/json": readonly components["schemas"]["Post"][];
         };
       };
       /** @description Unauthorized */

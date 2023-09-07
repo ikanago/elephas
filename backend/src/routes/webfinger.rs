@@ -17,9 +17,9 @@ pub async fn webfinger(
     host_name: web::Data<String>,
     web::Query(query): web::Query<WebfingerQuery>,
 ) -> Either<HttpResponse, impl Responder> {
-    let email = query.resource.replace("acct:", "");
+    let user_and_host_name = query.resource.replace("acct:", "");
     // TODO: assume valid email address.
-    let user_name = email.split('@').next().unwrap();
+    let user_name = user_and_host_name.split('@').next().unwrap();
     let host_name = host_name.as_ref();
 
     if let Err(_) = pool.get_user_by_name(user_name).await {

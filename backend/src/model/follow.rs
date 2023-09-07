@@ -100,7 +100,7 @@ mod tests {
                 name: name.to_string(),
                 password_hash: hash.to_string(),
                 display_name: name.to_string(),
-                description: String::new(),
+                summary: String::new(),
                 avatar_url: String::new(),
             })
             .await

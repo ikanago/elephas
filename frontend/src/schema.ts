@@ -3,7 +3,6 @@
  * Do not make direct changes to the file.
  */
 
-
 export interface paths {
   "/follow": {
     post: operations["create_follow"];
@@ -98,7 +97,6 @@ export type $defs = Record<string, never>;
 export type external = Record<string, never>;
 
 export interface operations {
-
   create_follow: {
     readonly requestBody: {
       readonly content: {

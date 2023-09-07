@@ -22,8 +22,7 @@ pub async fn reset_db(pool: web::Data<PgPool>) -> crate::Result<impl Responder> 
 
     for table in tables {
         if let Some(table_name) = table.table_name {
-            // To wait for the query to complete, bind the result to `_`.
-            let _ = sqlx::query(format!("DELETE FROM {} CASCADE;", table_name).as_str())
+            sqlx::query(format!("DELETE FROM {} CASCADE;", table_name).as_str())
                 .execute(pool.as_ref())
                 .await?;
         }

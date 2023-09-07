@@ -86,14 +86,21 @@ jobs:
           test $(echo -n "$diff" | wc -l) -eq 0
         working-directory: frontend
 
-      - uses: cypress-io/github-action@v5
+      - name: Install Playwright dependencies
+        run: |
+          npx playwright install-deps chrome
+
+      - name: Run Playwright tests
+        run: |
+          npm run e2e
+        working-directory: frontend
+
+      - uses: actions/upload-artifact@v3
+        if: always()
         with:
-          install: false
-          start: npm run start:backend
-          wait-on: 'http://localhost:3000/api/ping'
-          browser: chrome
-          record: false
-          working-directory: frontend
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
   frontend_test:
     runs-on: 'ubuntu-22.04'

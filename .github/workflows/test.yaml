@@ -39,7 +39,7 @@ jobs:
         working-directory: backend
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Cache dependencies
         # Skip on pull requests created by renovate because these PRs occupies the cache volume.
@@ -102,7 +102,7 @@ jobs:
         working-directory: frontend
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Cache dependencies
         if: github.actor != 'renovate[bot]'

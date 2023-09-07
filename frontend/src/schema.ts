@@ -92,6 +92,8 @@ export interface components {
   pathItems: never;
 }
 
+export type $defs = Record<string, never>;
+
 export type external = Record<string, never>;
 
 export interface operations {
@@ -103,7 +105,9 @@ export interface operations {
     };
     responses: {
       /** @description Successfully follow the user */
-      204: never;
+      204: {
+        content: never;
+      };
       /** @description Unauthorized */
       401: {
         content: {
@@ -126,7 +130,9 @@ export interface operations {
     };
     responses: {
       /** @description Successfully remove the user */
-      204: never;
+      204: {
+        content: never;
+      };
       /** @description Unauthorized */
       401: {
         content: {
@@ -203,7 +209,9 @@ export interface operations {
     };
     responses: {
       /** @description Successfully logged in */
-      204: never;
+      204: {
+        content: never;
+      };
       /** @description Unauthorized */
       401: {
         content: {
@@ -248,7 +256,9 @@ export interface operations {
     };
     responses: {
       /** @description Successfully update user profile */
-      204: never;
+      204: {
+        content: never;
+      };
       /** @description Unauthorized */
       401: {
         content: {
@@ -293,7 +303,9 @@ export interface operations {
     };
     responses: {
       /** @description Successfully created a post */
-      204: never;
+      204: {
+        content: never;
+      };
       /** @description Unauthorized */
       401: {
         content: {
@@ -316,7 +328,9 @@ export interface operations {
     };
     responses: {
       /** @description Successfully created a new user */
-      204: never;
+      204: {
+        content: never;
+      };
       /** @description InternalServerError */
       500: {
         content: {

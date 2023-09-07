@@ -7,12 +7,42 @@ const api =
     ? "http://localhost:5173/api"
     : "https://elephas-dev.ikanago.dev/api";
 
+type O = {
+  readonly requestBody: {
+    readonly content: {
+      readonly "application/json": "";
+    };
+  };
+  responses: {
+    /** @description Successfully created a post */
+    204: {
+      content: never;
+    };
+    /** @description Unauthorized */
+    401: {
+      content: {
+        readonly "application/json": "";
+      };
+    };
+    /** @description InternalServerError */
+    500: {
+      content: {
+        readonly "application/json": "";
+      };
+    };
+  };
+};
+
+// To get type { status: 204; data: never } | { status: 401; data: { message: string } } | { status: 500; data: { message: string } }, refine above ResponseOperation<Op> to:
 type ResponseOperation<Op> = Op extends { responses: infer Statuses }
   ? {
       [K in keyof Statuses]: Statuses[K] extends { content: infer Content }
-        ? Content extends { "application/json": infer Data }
-          ? { status: K; data: Data }
-          : { status: K }
+        ? {
+            status: K;
+            data: Content extends { "application/json": infer Data }
+              ? Data
+              : never;
+          }
         : never;
     }[keyof Statuses]
   : never;

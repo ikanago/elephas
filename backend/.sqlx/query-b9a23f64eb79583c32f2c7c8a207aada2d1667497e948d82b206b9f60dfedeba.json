@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO user_key_pair (\"user_name\", \"private_key\", \"public_key\")\n            VALUES (\n                $1,\n                $2,\n                $3\n            )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b9a23f64eb79583c32f2c7c8a207aada2d1667497e948d82b206b9f60dfedeba"
+}

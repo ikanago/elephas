@@ -1,22 +1,22 @@
 import { expect, test } from "@playwright/test";
 import config from "../playwright.config";
 
-const baseURL = config.use!.baseURL!;
+const baseURL = config.use?.baseURL!;
 
 const resetDb = async () => {
-    await fetch(`${baseURL}/api/reset-db`, {
-        method: "DELETE",
-    });
-}
+  await fetch(`${baseURL}/api/reset-db`, {
+    method: "DELETE",
+  });
+};
 
 const signupUser = async (username: string, password: string) => {
-    await fetch(`${baseURL}/api/signup`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: username, password: password }),
-    });
+  await fetch(`${baseURL}/api/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name: username, password: password }),
+  });
 };
 
 test.afterAll(async () => {
@@ -58,7 +58,9 @@ test.describe("sign up", () => {
 
     // assert
     await expect(page).toHaveURL("/signup");
-    await expect(page.locator(".error")).toHaveText("The user name is already used");
+    await expect(page.locator(".error")).toHaveText(
+      "The user name is already used",
+    );
   });
 });
 
@@ -97,7 +99,9 @@ test.describe("log in", () => {
     // assert
     await expect(page).toHaveURL("/login");
     expect(await page.context().cookies()).toHaveLength(0);
-    await expect(page.locator(".error")).toHaveText("User name or password is wrong");
+    await expect(page.locator(".error")).toHaveText(
+      "User name or password is wrong",
+    );
   });
 
   test("fails with wrong user name", async ({ page }) => {
@@ -139,7 +143,9 @@ test.describe("post", () => {
     // assert
     await expect(page).toHaveURL("/");
     await expect(page.locator(".timeline")).toHaveCount(1);
-    await expect(page.locator(".timeline").locator(".post")).toHaveText("hello");
+    await expect(page.locator(".timeline").locator(".post")).toHaveText(
+      "hello",
+    );
   });
 });
 
@@ -207,7 +213,9 @@ test.describe("user profile", () => {
     await expect(page.locator(".avatarUrl")).toHaveText(avatarUrl);
   });
 
-  test("failes editing by users other than the logged in user", async ({ page }) => {
+  test("failes editing by users other than the logged in user", async ({
+    page,
+  }) => {
     // act
     await page.goto("/users/dog");
 
@@ -216,52 +224,6 @@ test.describe("user profile", () => {
     await expect(page.locator(".edit")).not.toBeVisible();
   });
 });
-
-
-// describe("follow", () => {
-//     beforeEach(() => {
-//         cy.resetState();
-//         cy.signupUser("dog", "pass");
-//         cy.clearAllCookies();
-//         cy.signupUser("cat", "pass");
-//     });
-
-//     it("successfully", () => {
-//         // arrange
-//         cy.intercept("POST", "/api/follow").as("follow");
-//         cy.intercept("DELETE", "/api/follow").as("unfollow");
-
-//         // act
-//         cy.visit("/users/dog");
-//         cy.get(".follow").click();
-//         cy.wait("@follow");
-
-//         // assert
-//         cy.location("pathname").should("eq", "/users/dog");
-//         cy.get(".followees").should("have.text", "0 follows");
-//         cy.get(".followers").should("have.text", "1 followers");
-//         cy.get(".unfollow").should("have.text", "Unfollow");
-
-//         cy.visit("/users/cat");
-//         cy.get(".followees").should("have.text", "1 follows");
-//         cy.get(".followers").should("have.text", "0 followers");
-
-//         // act
-//         cy.visit("/users/dog");
-//         cy.get(".unfollow").click();
-//         cy.wait("@unfollow");
-
-//         // assert
-//         cy.location("pathname").should("eq", "/users/dog");
-//         cy.get(".followees").should("have.text", "0 follows");
-//         cy.get(".followers").should("have.text", "0 followers");
-//         cy.get(".follow").should("have.text", "Follow");
-
-//         cy.visit("/users/cat");
-//         cy.get(".followees").should("have.text", "0 follows");
-//         cy.get(".followers").should("have.text", "0 followers");
-//     });
-// });
 
 test.describe("follow", () => {
   test.beforeAll(async () => {

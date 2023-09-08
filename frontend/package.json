@@ -7,9 +7,8 @@
     "build": "tsc && vite build",
     "build:test": "tsc && vite build --mode test",
     "check": "biome check ./src/",
-    "cy:run": "cypress run -b chrome",
     "dev": "vite",
-    "e2e": "npm run build:test && start-server-and-test start:backend 'http-get://localhost:3000/api/ping' cy:run",
+    "e2e": "npm run build:test && playwright test",
     "fix": "biome check --apply ./src/",
     "schema": "cargo run --manifest-path=../backend/Cargo.toml --bin gen_schema --release -- ../schema.json && openapi-typescript ../schema.json --output src/schema.ts --immutable-types",
     "start:backend": "ENV=dev cargo run --manifest-path=../backend/Cargo.toml --bin app --release",
@@ -24,14 +23,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.0.0",
-    "@types/mocha": "10.0.1",
+    "@playwright/test": "^1.37.1",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "@vitejs/plugin-react": "4.0.4",
-    "cypress": "13.1.0",
-    "mocha": "10.2.0",
     "openapi-typescript": "6.5.4",
-    "start-server-and-test": "2.0.0",
+    "playwright": "1.37.1",
     "typescript": "5.2.2",
     "vite": "4.4.9"
   }

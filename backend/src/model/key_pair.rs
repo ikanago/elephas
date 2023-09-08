@@ -11,7 +11,7 @@ use rsa::{
     pkcs8::{spki::EncodePublicKey, DecodePrivateKey},
     pkcs8::{EncodePrivateKey, LineEnding},
     sha2::Sha256,
-    signature::Signer,
+    signature::{SignatureEncoding, Signer},
     RsaPrivateKey, RsaPublicKey,
 };
 use sqlx::PgPool;
@@ -106,9 +106,9 @@ pub fn sign_headers(
     .join("\n");
     let private_key =
         RsaPrivateKey::from_pkcs8_pem(&private_key).expect("Only valid private key must be stored");
-    let signing_key = SigningKey::<Sha256>::new_with_prefix(private_key);
-    let signature = signing_key.sign(signed_string.as_bytes());
-    let signature = general_purpose::STANDARD.encode(signature);
+    let signing_key = SigningKey::<Sha256>::new(private_key);
+    let signature: rsa::pkcs1v15::Signature = signing_key.sign(signed_string.as_bytes());
+    let signature = general_purpose::STANDARD.encode(signature.to_bytes());
 
     let headers = [
         (HOST, host_name),

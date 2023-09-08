@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO users (\"name\", \"password_hash\", \"display_name\", \"summary\", \"avatar_url\")\n            VALUES (\n                $1,\n                $2,\n                $3,\n                $4,\n                $5\n            )\n            ON CONFLICT (\"name\") DO UPDATE\n            SET\n                \"password_hash\" = EXCLUDED.\"password_hash\",\n                \"display_name\" = EXCLUDED.\"display_name\",\n                \"summary\" = EXCLUDED.\"summary\",\n                \"avatar_url\" = EXCLUDED.\"avatar_url\"\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9fc48c4d16ac6a97c14d585f44a531a0fd52b524e9bbe26a2fc55db5760e7f73"
+}

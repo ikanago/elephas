@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT table_name\n        FROM information_schema.tables\n        WHERE table_schema = 'public'\n            AND table_type = 'BASE TABLE'\n            AND table_name NOT LIKE '\\_%' ESCAPE '\\';",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "table_name",
+        "type_info": "Name"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "ff21a613d148601559298686711c85f43227eead95e63b525d5d3f2426d0e338"
+}

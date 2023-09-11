@@ -28,7 +28,11 @@ async fn main() {
         .await
         .unwrap();
 
-    let host_name = std::env::var("HOST_NAME").unwrap();
+    let host_name = if std::env::var("ENV").unwrap_or_default() == "dev" {
+        "localhost:3000".to_string()
+    } else {
+        std::env::var("HOST_NAME").unwrap()
+    };
     info!(host_name);
     let cookie_key = {
         let key = std::env::var("COOKIE_KEY").unwrap();

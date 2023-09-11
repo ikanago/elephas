@@ -1,15 +1,17 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tracing::info;
 
-#[derive(Clone, Debug, Deserialize)]
-struct Webfinger {
-    links: Vec<WebfingerLink>,
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Webfinger {
+    pub subject: String,
+    pub links: Vec<WebfingerLink>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-struct WebfingerLink {
-    rel: String,
-    href: Option<String>,
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct WebfingerLink {
+    pub href: Option<String>,
+    pub rel: String,
+    pub r#type: String,
 }
 
 pub async fn fetch(user_name: &str, host_name: &str) -> crate::Result<String> {

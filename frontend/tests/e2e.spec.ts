@@ -1,23 +1,5 @@
 import { expect, test } from "@playwright/test";
-import config from "../playwright.config";
-
-const baseURL = config.use?.baseURL!;
-
-const resetDb = async () => {
-  await fetch(`${baseURL}/api/reset-db`, {
-    method: "DELETE",
-  });
-};
-
-const signupUser = async (username: string, password: string) => {
-  await fetch(`${baseURL}/api/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name: username, password: password }),
-  });
-};
+import { baseURL, resetDb, signupUser } from "./util";
 
 test.afterAll(async () => {
   await resetDb();

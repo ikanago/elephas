@@ -32,7 +32,7 @@ pub async fn webfinger(
             {
                 "rel": "self",
                 "type": "application/activity+json",
-                "href": format!("https://{host_name}/users/{user_name}"),
+                "href": format!("https://{host_name}/api/users/{user_name}"),
             },
         ],
     })))

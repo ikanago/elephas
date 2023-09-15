@@ -28,7 +28,7 @@ pub async fn webfinger(
         return HttpResponse::NotFound().finish();
     }
 
-    let webfinger_user = Webfinger {
+    let webfinger = Webfinger {
         subject: format!("acct:{user_name}@{host_name}"),
         links: vec![{
             WebfingerLink {
@@ -38,5 +38,5 @@ pub async fn webfinger(
             }
         }],
     };
-    HttpResponse::Ok().json(webfinger_user)
+    HttpResponse::Ok().json(webfinger)
 }

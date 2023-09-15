@@ -28,22 +28,15 @@ pub async fn create_follow(
     body: web::Json<Follow>,
     session: Session,
 ) -> crate::Result<impl Responder> {
-    create_follow_service(pool.as_ref(), body.into_inner(), session).await
-}
-
-async fn create_follow_service(
-    pool: &PgPool,
-    Follow {
-        follow_from_name,
-        follow_to_name,
-    }: Follow,
-    session: Session,
-) -> crate::Result<impl Responder> {
     let user_name = session
         .get::<String>(SESSION_KEY)
         .map_err(|_| ServiceError::InternalServerError)?
         .ok_or(ServiceError::WrongCredential)?;
 
+    let Follow {
+        follow_from_name,
+        follow_to_name,
+    } = body.into_inner();
     if user_name != follow_from_name {
         return Err(ServiceError::WrongCredential);
     }
@@ -51,6 +44,8 @@ async fn create_follow_service(
     if pool.get_user_by_name(&follow_to_name).await.is_err() {
         return Err(ServiceError::UserNotFound);
     }
+
+    // TODO: check if the user is already followed
 
     let follow = Follow {
         follow_from_name,

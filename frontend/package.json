@@ -24,7 +24,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.2.2",
     "@playwright/test": "1.38.0",
-    "@types/react": "18.2.21",
+    "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",
     "@vitejs/plugin-react": "4.0.4",
     "openapi-typescript": "6.6.1",

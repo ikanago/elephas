@@ -23,12 +23,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.2.2",
-    "@playwright/test": "1.38.0",
+    "@playwright/test": "1.38.1",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",
     "@vitejs/plugin-react": "4.0.4",
     "openapi-typescript": "6.6.1",
-    "playwright": "1.38.0",
+    "playwright": "1.38.1",
     "typescript": "5.2.2",
     "vite": "4.4.9"
   }

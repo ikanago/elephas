@@ -31,7 +31,7 @@ sqlx = { version = "0.7.2", features = [
 ] }
 thiserror = "1.0.49"
 tracing = "0.1.37"
-tracing-actix-web = "0.7.6"
+tracing-actix-web = "0.7.7"
 tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
 utoipa = { version = "3.5.0", features = ["actix_extras", "chrono"] }
 uuid = "1.4.1"

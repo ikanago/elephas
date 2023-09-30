@@ -5,26 +5,10 @@ services:
     image: redis:7.2.1
     ports:
       - 6379:6379
+
   db:
     image: postgres:15.4
     volumes:
       - ./backend/db:/var/lib/postgresql/data
     ports:
       - 5432:5432
-  caddy:
-    image: "caddy:2.7.4-alpine"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-      - ./proxy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./proxy/certs:/ssl/certs:ro
-    # Needed to access the machine's localhost from within container
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-volumes:
-  caddy_data:
-  caddy_config:

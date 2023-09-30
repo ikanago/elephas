@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  misskey:
+    image: "misskey/misskey:13.14.2"
+    restart: always
+    platform: linux/x86_64
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - "./.config:/misskey/.config:ro"
+    ports:
+      - 4000:4000
+
+  redis:
+    restart: always
+    image: redis:7-alpine
+    volumes:
+      - misskey-redis:/data
+    ports:
+      - 6378:6379
+    healthcheck:
+      test: "redis-cli ping"
+      interval: 5s
+      retries: 20
+
+  db:
+    restart: always
+    image: postgres:15-alpine
+    env_file:
+      - .config/docker.env
+    volumes:
+      - misskey-db:/var/lib/postgresql/data
+    ports:
+      - 5431:5432
+    healthcheck:
+      test: "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"
+      interval: 5s
+      retries: 20
+
+volumes:
+  misskey-db:
+  misskey-redis:

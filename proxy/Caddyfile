@@ -1,7 +1,0 @@
-*.home.ikanago.dev {
-    tls /ssl/certs/fullchain.pem /ssl/certs/privkey.pem
-}
-
-nginx.home.ikanago.dev {
-    reverse_proxy / host.docker.internal:8080
-}

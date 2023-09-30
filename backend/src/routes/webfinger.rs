@@ -34,7 +34,7 @@ pub async fn webfinger(
             WebfingerLink {
                 href: Some(format!("https://{host_name}/api/users/{user_name}")),
                 rel: "self".to_string(),
-                r#type: "application/activity+json".to_string(),
+                r#type: Some("application/activity+json".to_string()),
             }
         }],
     };

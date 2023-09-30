@@ -9,8 +9,8 @@ struct ApPerson {
     id: String,
     r#type: String,
     preferred_username: String,
-    name: String,
-    summary: String,
+    name: Option<String>,
+    summary: Option<String>,
 }
 
 pub async fn resolve(user_name: &str, host_name: &str) -> crate::Result<UserProfile> {
@@ -27,8 +27,8 @@ pub async fn resolve(user_name: &str, host_name: &str) -> crate::Result<UserProf
         .await?;
     let profile = UserProfile {
         name: object.preferred_username,
-        display_name: object.name,
-        summary: object.summary,
+        display_name: object.name.unwrap_or_default(),
+        summary: object.summary.unwrap_or_default(),
         avatar_url: "".to_string(),
     };
 

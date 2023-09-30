@@ -4,8 +4,8 @@ const api =
   import.meta.env.MODE === "test"
     ? "http://localhost:3000/api"
     : import.meta.env.MODE === "development"
-      ? "http://localhost:5173/api"
-      : "https://elephas-dev.ikanago.dev/api";
+    ? "http://localhost:5173/api"
+    : "https://elephas-dev.ikanago.dev/api";
 
 type O = {
   readonly requestBody: {
@@ -36,15 +36,15 @@ type O = {
 // To get type { status: 204; data: never } | { status: 401; data: { message: string } } | { status: 500; data: { message: string } }, refine above ResponseOperation<Op> to:
 type ResponseOperation<Op> = Op extends { responses: infer Statuses }
   ? {
-    [K in keyof Statuses]: Statuses[K] extends { content: infer Content }
-    ? {
-      status: K;
-      data: Content extends { "application/json": infer Data }
-      ? Data
-      : never;
-    }
-    : never;
-  }[keyof Statuses]
+      [K in keyof Statuses]: Statuses[K] extends { content: infer Content }
+        ? {
+            status: K;
+            data: Content extends { "application/json": infer Data }
+              ? Data
+              : never;
+          }
+        : never;
+    }[keyof Statuses]
   : never;
 
 export type ResponseGet<P extends keyof paths> = paths[P] extends {
@@ -67,96 +67,96 @@ export type ResponseDelete<P extends keyof paths> = paths[P] extends {
 
 type Parameters<P extends keyof paths> = paths[P] extends { get: infer Get }
   ? Get extends { parameters: infer Params }
-  ? Params extends { path: infer Path }
-  ? Path
-  : never
-  : never
+    ? Params extends { path: infer Path }
+      ? Path
+      : never
+    : never
   : never;
 
 type Payload<P extends keyof paths> = paths[P] extends { post: infer Post }
   ? Post extends {
-    requestBody: {
-      content: {
-        "application/json": infer Body;
+      requestBody: {
+        content: {
+          "application/json": infer Body;
+        };
       };
-    };
-  }
-  ? Body
-  : undefined
+    }
+    ? Body
+    : undefined
   : undefined;
 
 const apiGet =
   <P extends keyof paths>(path: P) =>
-    async (params?: Parameters<P>): Promise<ResponseGet<P>> => {
-      let replacedPath;
-      if (params !== undefined) {
-        replacedPath = path.replace(/{([^}]*)}/g, (_, key) => params[key]);
-      } else {
-        replacedPath = path;
-      }
-      const res = await fetch(`${api}${replacedPath}`, {
-        method: "GET",
-        credentials: "include",
-      });
+  async (params?: Parameters<P>): Promise<ResponseGet<P>> => {
+    let replacedPath;
+    if (params !== undefined) {
+      replacedPath = path.replace(/{([^}]*)}/g, (_, key) => params[key]);
+    } else {
+      replacedPath = path;
+    }
+    const res = await fetch(`${api}${replacedPath}`, {
+      method: "GET",
+      credentials: "include",
+    });
 
-      const data = await res.json();
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const response = {
-        status: res.status,
-        data,
-      } as ResponseGet<P>;
-      return response;
-    };
+    const data = await res.json();
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const response = {
+      status: res.status,
+      data,
+    } as ResponseGet<P>;
+    return response;
+  };
 
 const apiPost =
   <P extends keyof paths>(path: P) =>
-    async (payload: Payload<P>): Promise<ResponsePost<P>> => {
-      const res = await fetch(`${api}${path}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+  async (payload: Payload<P>): Promise<ResponsePost<P>> => {
+    const res = await fetch(`${api}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-      if (res.status === 204) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return {
-          status: res.status,
-        } as ResponsePost<P>;
-      }
-
-      const data = await res.json();
+    if (res.status === 204) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return {
         status: res.status,
-        data,
-      } as unknown as ResponsePost<P>;
-    };
+      } as ResponsePost<P>;
+    }
+
+    const data = await res.json();
+    return {
+      status: res.status,
+      data,
+    } as unknown as ResponsePost<P>;
+  };
 
 const apiDelete =
   <P extends keyof paths>(path: P) =>
-    async (payload: Payload<P>): Promise<ResponseDelete<P>> => {
-      const res = await fetch(`${api}${path}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+  async (payload: Payload<P>): Promise<ResponseDelete<P>> => {
+    const res = await fetch(`${api}${path}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-      if (res.status === 204) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return {
-          status: res.status,
-        } as ResponseDelete<P>;
-      }
-
-      const data = await res.json();
+    if (res.status === 204) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return {
         status: res.status,
-        data,
-      } as unknown as ResponseDelete<P>;
-    };
+      } as ResponseDelete<P>;
+    }
+
+    const data = await res.json();
+    return {
+      status: res.status,
+      data,
+    } as unknown as ResponseDelete<P>;
+  };
 
 export const me = apiGet("/me");
 

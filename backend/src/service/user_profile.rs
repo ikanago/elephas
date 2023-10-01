@@ -1,35 +1,17 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::PgPool;
 use tracing::info;
 use utoipa::ToSchema;
 
 use crate::{
-    model::{User, UserRepository},
+    model::{
+        ap_person::ApPersonRepositoryImpl,
+        user::{User, UserRepository},
+        user_profile::UserProfile,
+        webfinger::RemoteWebfingerRepositoryImpl,
+    },
     service::remote_user,
 };
-
-#[derive(Clone, Debug, Serialize, ToSchema)]
-pub struct UserProfile {
-    #[schema(example = "alice")]
-    pub name: String,
-    #[schema(example = "Alice")]
-    pub display_name: String,
-    #[schema(example = "I am Alice.")]
-    pub summary: String,
-    #[schema(example = "https://example.com/avatar.png")]
-    pub avatar_url: String,
-}
-
-impl From<User> for UserProfile {
-    fn from(user: User) -> Self {
-        Self {
-            name: user.name,
-            display_name: user.display_name,
-            summary: user.summary,
-            avatar_url: user.avatar_url,
-        }
-    }
-}
 
 pub async fn get_user_profile_service(
     pool: &PgPool,
@@ -37,7 +19,13 @@ pub async fn get_user_profile_service(
 ) -> crate::Result<UserProfile> {
     info!(user_name);
     if let Some((user_name, host_name)) = parse_user_and_host_name(user_name) {
-        let user_profile = remote_user::resolve(&user_name, &host_name).await?;
+        let user_profile = remote_user::resolve(
+            &user_name,
+            &host_name,
+            RemoteWebfingerRepositoryImpl,
+            ApPersonRepositoryImpl,
+        )
+        .await?;
         info!(user = ?user_profile);
         return Ok(user_profile);
     }

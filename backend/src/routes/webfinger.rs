@@ -2,9 +2,9 @@ use actix_web::{get, web, HttpResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::{
-    model::UserRepository,
-    service::webfinger::{Webfinger, WebfingerLink},
+use crate::model::{
+    webfinger::{Webfinger, WebfingerLink},
+    UserRepository,
 };
 
 #[derive(Debug, Deserialize)]

@@ -7,9 +7,9 @@ use crate::{
     error::ServiceError,
     model::{
         follow::{Follow, FollowRepository},
-        UserRepository,
+        user::UserRepository,
+        user_profile::UserProfile,
     },
-    service::user_profile::UserProfile,
     SESSION_KEY,
 };
 

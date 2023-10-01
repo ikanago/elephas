@@ -57,13 +57,13 @@ async fn ping() -> impl Responder {
         self::follow::get_followers_by_user_name,
     ),
     components(schemas(
-        self::signup::SignupCredential,
         self::login::LoginCredential,
-        crate::service::user_profile::UserProfile,
-        crate::service::user_profile::UserProfileUpdate,
         self::post::NewPost,
-        crate::model::post::Post,
+        self::signup::SignupCredential,
+        crate::service::user_profile::UserProfileUpdate,
         crate::model::follow::Follow,
+        crate::model::post::Post,
+        crate::model::user_profile::UserProfile,
         crate::error::ErrorMessage,
     )),
     servers(

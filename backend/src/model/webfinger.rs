@@ -19,9 +19,7 @@ pub async fn fetch(user_name: &str, host_name: &str) -> crate::Result<String> {
         "https://{}/.well-known/webfinger?resource=acct:{}@{}",
         host_name, user_name, host_name
     );
-    let webfinger = reqwest::get(url).await?;
-    info!(webfinger_response = ?webfinger);
-    let webfinger = webfinger.json::<Webfinger>().await?;
+    let webfinger = reqwest::get(url).await?.json::<Webfinger>().await?;;
     info!(webfinger = ?webfinger.clone());
     Ok(webfinger
         .links

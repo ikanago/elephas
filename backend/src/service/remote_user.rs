@@ -1,7 +1,8 @@
 use reqwest::{header::ACCEPT, Client};
 use serde::Deserialize;
 
-use super::{user_profile::UserProfile, webfinger};
+use super::user_profile::UserProfile;
+use crate::model::webfinger;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]

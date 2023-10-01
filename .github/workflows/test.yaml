@@ -41,12 +41,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache dependencies
-        # Skip on pull requests created by renovate because these PRs occupies the cache volume.
-        if: github.actor != 'renovate[bot]'
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: backend -> target
+      # - name: Cache dependencies
+      #   # Skip on pull requests created by renovate because these PRs occupies the cache volume.
+      #   if: github.actor != 'renovate[bot]'
+      #   uses: Swatinem/rust-cache@v2
+      #   with:
+      #     workspaces: backend -> target
 
       - name: Setup Postgresql
         run: psql "${DATABASE_URL}" < ./migrations/20230222011102_init.sql

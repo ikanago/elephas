@@ -3,7 +3,7 @@ use crate::{
     model::{key_pair::generate_key_pair, KeyPair, KeyPairRepository, User, UserRepository},
 };
 use actix_session::Session;
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;
 use tracing::info;
@@ -18,13 +18,14 @@ pub struct SignupCredential {
 }
 
 #[utoipa::path(
+    post,
+    path = "/signup",
     request_body = SignupCredential,
     responses(
         (status = 204, description = "Successfully created a new user"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[post("/signup")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn signup(
     pool: web::Data<PgPool>,

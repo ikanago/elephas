@@ -2,20 +2,21 @@ use crate::{
     model::{KeyPairRepository, UserRepository},
     service::user_profile::get_user_profile_service,
 };
-use actix_web::{get, http::header::Accept, web, Responder};
+use actix_web::{http::header::Accept, web, Responder};
 use serde_json::{json, Value};
 use sqlx::PgPool;
 
 #[utoipa::path(
+    get,
+    path = "/users/{user_name}",
     responses(
         (status = 200, body = UserProfile, description = "Successfully fetched user info"),
         (status = 400, body = ErrorMessage, description = "BadRequest"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[get("/users/{name}")]
 #[tracing::instrument(skip(pool, host_name))]
-async fn user_profile(
+pub async fn user_profile(
     pool: web::Data<PgPool>,
     host_name: web::Data<String>,
     accept: web::Header<Accept>,

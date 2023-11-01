@@ -3,15 +3,16 @@
  * Do not make direct changes to the file.
  */
 
+
 export interface paths {
   "/follow": {
     post: operations["create_follow"];
     delete: operations["delete_follow"];
   };
-  "/followees/{name}": {
+  "/followees/{user_name}": {
     get: operations["get_followees_by_user_name"];
   };
-  "/followers/{name}": {
+  "/followers/{user_name}": {
     get: operations["get_followers_by_user_name"];
   };
   "/login": {
@@ -28,7 +29,7 @@ export interface paths {
   "/signup": {
     post: operations["signup"];
   };
-  "/users/{name}": {
+  "/users/{user_name}": {
     get: operations["user_profile"];
   };
 }
@@ -97,6 +98,7 @@ export type $defs = Record<string, never>;
 export type external = Record<string, never>;
 
 export interface operations {
+
   create_follow: {
     readonly requestBody: {
       readonly content: {
@@ -150,7 +152,7 @@ export interface operations {
   get_followees_by_user_name: {
     parameters: {
       path: {
-        name: string;
+        user_name: string;
       };
     };
     responses: {
@@ -177,7 +179,7 @@ export interface operations {
   get_followers_by_user_name: {
     parameters: {
       path: {
-        name: string;
+        user_name: string;
       };
     };
     responses: {
@@ -342,7 +344,7 @@ export interface operations {
   user_profile: {
     parameters: {
       path: {
-        name: string;
+        user_name: string;
       };
     };
     responses: {

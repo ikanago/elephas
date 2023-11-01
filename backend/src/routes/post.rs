@@ -1,5 +1,5 @@
 use actix_session::Session;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use chrono::Utc;
 use serde::Deserialize;
 use sqlx::PgPool;
@@ -19,6 +19,8 @@ pub struct NewPost {
 }
 
 #[utoipa::path(
+    post,
+    path = "/posts",
     request_body = NewPost,
     responses(
         (status = 204, description = "Successfully created a post"),
@@ -26,7 +28,6 @@ pub struct NewPost {
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[post("/posts")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn create_post(
     pool: web::Data<PgPool>,
@@ -56,13 +57,14 @@ async fn create_post_service(
 }
 
 #[utoipa::path(
+    get,
+    path = "/posts",
     responses(
         (status = 200, body = Vec<Post>, description = "Successfully get posts for a user"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[get("/posts")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn get_posts_by_user_name(
     pool: web::Data<PgPool>,

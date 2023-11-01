@@ -1,7 +1,6 @@
 use actix_files::{Files, NamedFile};
 use actix_session::{storage::RedisActorSessionStore, SessionMiddleware};
 use actix_web::{cookie::Key, web, App, HttpServer};
-use backend::routes::routing;
 use base64::engine::{general_purpose, Engine};
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
@@ -54,7 +53,7 @@ async fn main() {
                 .build(),
             )
             .wrap(TracingLogger::default())
-            .service(routing())
+            .configure(backend::routes::route)
             .service(backend::routes::webfinger::webfinger)
             .service(backend::routes::host_meta::host_meta)
             .service(backend::routes::nodeinfo::nodeinfo_discovery)

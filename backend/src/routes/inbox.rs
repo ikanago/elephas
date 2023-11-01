@@ -1,5 +1,5 @@
 use crate::model::{key_pair::sign_headers, KeyPairRepository, UserRepository};
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
 use serde_json::json;
 use sqlx::PgPool;
@@ -12,8 +12,7 @@ pub struct InboxBody {
     object: String,
 }
 
-#[post("/users/{name}/inbox")]
-async fn inbox(
+pub async fn inbox(
     pool: web::Data<PgPool>,
     host_name: web::Data<String>,
     param: web::Path<String>,

@@ -1,7 +1,6 @@
 use actix_session::Session;
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use sqlx::PgPool;
-use tracing::debug;
 
 use crate::{
     error::ServiceError,
@@ -14,6 +13,8 @@ use crate::{
 };
 
 #[utoipa::path(
+    post,
+    path = "/follow",
     request_body = Follow,
     responses(
         (status = 204, description = "Successfully follow the user"),
@@ -21,7 +22,6 @@ use crate::{
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[post("/follow")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn create_follow(
     pool: web::Data<PgPool>,
@@ -81,6 +81,8 @@ pub async fn create_follow(
 }
 
 #[utoipa::path(
+    delete,
+    path = "/follow",
     request_body = Follow,
     responses(
         (status = 204, description = "Successfully remove the user"),
@@ -88,7 +90,6 @@ pub async fn create_follow(
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[delete("/follow")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn delete_follow(
     pool: web::Data<PgPool>,
@@ -109,13 +110,14 @@ pub async fn delete_follow(
 }
 
 #[utoipa::path(
+    get,
+    path = "/followees/{user_name}",
     responses(
         (status = 200, body = Vec<UserProfile>, description = "Successfully get followees for a user"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[get("/followees/{name}")]
 #[tracing::instrument(skip(pool))]
 pub async fn get_followees_by_user_name(
     pool: web::Data<PgPool>,
@@ -127,18 +129,18 @@ pub async fn get_followees_by_user_name(
         .into_iter()
         .map(|user| UserProfile::from(user))
         .collect::<Vec<_>>();
-    debug!(folloees = ?folloees);
     Ok(HttpResponse::Ok().json(folloees))
 }
 
 #[utoipa::path(
+    get,
+    path = "/followers/{user_name}",
     responses(
         (status = 200, body = Vec<UserProfile>, description = "Successfully get followers for a user"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[get("/followers/{name}")]
 #[tracing::instrument(skip(pool))]
 pub async fn get_followers_by_user_name(
     pool: web::Data<PgPool>,
@@ -150,6 +152,5 @@ pub async fn get_followers_by_user_name(
         .into_iter()
         .map(|user| UserProfile::from(user))
         .collect::<Vec<_>>();
-    debug!(folloers = ?folloers);
     Ok(HttpResponse::Ok().json(folloers))
 }

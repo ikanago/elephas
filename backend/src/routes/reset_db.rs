@@ -1,11 +1,10 @@
-use actix_web::{delete, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use sqlx::PgPool;
 
 struct Table {
     table_name: Option<String>,
 }
 
-#[delete("/reset-db")]
 #[tracing::instrument(skip(pool))]
 pub async fn reset_db(pool: web::Data<PgPool>) -> crate::Result<impl Responder> {
     let tables = sqlx::query_as!(

@@ -1,6 +1,6 @@
 use crate::{error::ServiceError, model::UserRepository, SESSION_KEY};
 use actix_session::Session;
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;
 use tracing::info;
@@ -13,6 +13,8 @@ pub struct LoginCredential {
 }
 
 #[utoipa::path(
+    post,
+    path = "/login",
     request_body = LoginCredential,
     responses(
         (status = 204, description = "Successfully logged in"),
@@ -20,7 +22,6 @@ pub struct LoginCredential {
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[post("/login")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn login(
     pool: web::Data<PgPool>,
@@ -41,9 +42,7 @@ async fn login_service(
         .map_err(|_| ServiceError::UserNotFound)?;
     info!(user = ?user);
     // extract password hash or return error with `let else`
-    let password_hash = user
-        .password_hash
-        .ok_or(ServiceError::WrongCredential)?;
+    let password_hash = user.password_hash.ok_or(ServiceError::WrongCredential)?;
     verify_password(&password, &password_hash)?;
 
     session.renew();

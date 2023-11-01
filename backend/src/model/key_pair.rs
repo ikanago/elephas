@@ -28,7 +28,7 @@ pub struct KeyPair {
 #[async_trait]
 pub trait KeyPairRepository {
     async fn save_key_pair(&self, key_pair: KeyPair) -> crate::Result<()>;
-    async fn get_key_pair_by_user_name(&self, user_name: String) -> crate::Result<KeyPair>;
+    async fn get_key_pair_by_user_name(&self, user_name: &str) -> crate::Result<KeyPair>;
 }
 
 #[async_trait]
@@ -52,7 +52,7 @@ impl KeyPairRepository for PgPool {
         Ok(())
     }
 
-    async fn get_key_pair_by_user_name(&self, user_name: String) -> crate::Result<KeyPair> {
+    async fn get_key_pair_by_user_name(&self, user_name: &str) -> crate::Result<KeyPair> {
         let key_pair = sqlx::query_as!(
             KeyPair,
             r#"

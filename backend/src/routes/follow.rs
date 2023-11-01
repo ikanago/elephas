@@ -1,6 +1,5 @@
 use actix_session::Session;
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
-use serde_json::json;
 use sqlx::PgPool;
 use tracing::debug;
 
@@ -8,10 +7,8 @@ use crate::{
     error::ServiceError,
     model::{
         follow::{Follow, FollowRepository},
-        key_pair::sign_headers,
         user::{parse_user_and_host_name, UserRepository},
         user_profile::UserProfile,
-        KeyPairRepository,
     },
     SESSION_KEY,
 };
@@ -48,27 +45,14 @@ pub async fn create_follow(
     let (follow_to_username, follow_to_host_name) = parse_user_and_host_name(&follow_to_name)
         .unwrap_or((follow_to_name.clone(), String::new()));
     let is_follow_to_remote = !follow_to_host_name.is_empty();
-    debug!(follow_to_username = ?follow_to_username, host_name = ?follow_to_host_name, is_follow_to_remote);
     if pool.get_user_by_name(&follow_to_name).await.is_err() {
         if is_follow_to_remote {
-            let person = crate::service::remote_user::resolve(
+            crate::service::remote_user::create_remote_user(
+                &pool,
                 &follow_to_username,
                 &follow_to_host_name,
-                crate::model::webfinger::RemoteWebfingerRepositoryImpl,
-                crate::model::ap_person::ApPersonRepositoryImpl,
             )
             .await?;
-            debug!(person = ?person);
-            let user_profile: UserProfile = person.into();
-            let user = crate::model::user::User {
-                // TODO: use ID
-                name: user_profile.name.clone(),
-                display_name: user_profile.display_name.clone(),
-                summary: user_profile.summary.clone(),
-                avatar_url: user_profile.avatar_url.clone(),
-                ..Default::default()
-            };
-            pool.save_user(user).await?;
         } else {
             return Err(ServiceError::UserNotFound);
         }
@@ -83,31 +67,14 @@ pub async fn create_follow(
     pool.save_follow(follow).await?;
 
     if is_follow_to_remote {
-        let person = crate::service::remote_user::resolve(
+        crate::service::activitypub::follow_remote_person(
+            &pool,
+            &host_name,
+            &follow_from_name,
             &follow_to_username,
             &follow_to_host_name,
-            crate::model::webfinger::RemoteWebfingerRepositoryImpl,
-            crate::model::ap_person::ApPersonRepositoryImpl,
         )
         .await?;
-        let payload = json!({
-            "@context": [
-                "https://www.w3.org/ns/activitystreams",
-                "https://w3id.org/security/v1",
-            ],
-            "type": "Follow",
-            "actor": format!("https://{}/api/users/{}", host_name.into_inner(), follow_from_name),
-            "object": person.id,
-        });
-        let keypair = pool.get_key_pair_by_user_name(follow_from_name).await?;
-        let headers = sign_headers(&payload, &person.inbox, &keypair.private_key)?;
-        debug!(payload = ?payload, keypair = ?keypair, headers = ?headers);
-        reqwest::Client::new()
-            .post(&person.inbox)
-            .headers(headers)
-            .json(&payload)
-            .send()
-            .await?;
     }
 
     Ok(HttpResponse::NoContent().finish())

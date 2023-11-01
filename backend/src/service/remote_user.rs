@@ -1,6 +1,10 @@
+use sqlx::PgPool;
+
 use crate::model::{
     ap_person::{ApPerson, ApPersonRepository},
+    user_profile::UserProfile,
     webfinger::RemoteWebfingerRepository,
+    UserRepository,
 };
 
 pub async fn resolve(
@@ -23,6 +27,31 @@ pub async fn resolve(
 
     let ap_person = ap_person_repository.fetch_ap_person(href.as_str()).await?;
     Ok(ap_person)
+}
+
+pub async fn create_remote_user(
+    pool: &PgPool,
+    user_name: &str,
+    host_name: &str,
+) -> crate::Result<()> {
+    let person = crate::service::remote_user::resolve(
+        user_name,
+        host_name,
+        crate::model::webfinger::RemoteWebfingerRepositoryImpl,
+        crate::model::ap_person::ApPersonRepositoryImpl,
+    )
+    .await?;
+    let user_profile: UserProfile = person.into();
+    let user = crate::model::user::User {
+        // TODO: use ID
+        name: user_profile.name.clone(),
+        display_name: user_profile.display_name.clone(),
+        summary: user_profile.summary.clone(),
+        avatar_url: user_profile.avatar_url.clone(),
+        ..Default::default()
+    };
+    pool.save_user(user).await?;
+    Ok(())
 }
 
 #[cfg(test)]

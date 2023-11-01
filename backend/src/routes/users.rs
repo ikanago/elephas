@@ -35,7 +35,7 @@ async fn user_info_activity_json(
     name: &str,
 ) -> crate::Result<web::Json<Value>> {
     let user = pool.get_user_by_name(&name).await?;
-    let key_pair = pool.get_key_pair_by_user_name(user.name).await?;
+    let key_pair = pool.get_key_pair_by_user_name(&user.name).await?;
 
     let base_url = format!("https://{}/api/users/{}", host_name, name);
     Ok(web::Json(json!({

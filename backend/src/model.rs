@@ -1,4 +1,4 @@
-pub mod ap_person;
+pub mod activitypub;
 pub mod follow;
 pub mod key_pair;
 pub mod nodeinfo;

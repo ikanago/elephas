@@ -18,7 +18,7 @@ use sqlx::PgPool;
 
 use crate::error::ServiceError;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct KeyPair {
     pub user_name: String,
     pub private_key: String,

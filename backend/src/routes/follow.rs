@@ -5,9 +5,11 @@ use sqlx::PgPool;
 use crate::{
     error::ServiceError,
     model::{
+        activitypub::ActivityPubRequestRepositoryImpl,
         follow::{Follow, FollowRepository},
         user::{parse_user_and_host_name, UserRepository},
         user_profile::UserProfile,
+        webfinger::RemoteWebfingerRepositoryImpl,
     },
     SESSION_KEY,
 };
@@ -73,6 +75,8 @@ pub async fn create_follow(
             &follow_from_name,
             &follow_to_username,
             &follow_to_host_name,
+            &ActivityPubRequestRepositoryImpl,
+            &RemoteWebfingerRepositoryImpl,
         )
         .await?;
     }

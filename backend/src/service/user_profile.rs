@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 
 use crate::{
     model::{
-        ap_person::ApPersonRepositoryImpl,
+        activitypub::ActivityPubRequestRepositoryImpl,
         user::{parse_user_and_host_name, User, UserRepository},
         user_profile::UserProfile,
         webfinger::RemoteWebfingerRepositoryImpl,
@@ -22,8 +22,8 @@ pub async fn get_user_profile_service(
         let person = remote_user::resolve(
             &user_name,
             &host_name,
-            RemoteWebfingerRepositoryImpl,
-            ApPersonRepositoryImpl,
+            &RemoteWebfingerRepositoryImpl,
+            &ActivityPubRequestRepositoryImpl,
         )
         .await?;
         let user_profile = person.into();

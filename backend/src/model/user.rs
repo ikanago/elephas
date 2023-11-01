@@ -2,13 +2,20 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct User {
     pub name: String,
-    pub password_hash: String,
+    pub password_hash: Option<String>,
     pub display_name: String,
     pub summary: String,
     pub avatar_url: String,
+}
+
+pub fn parse_user_and_host_name(user_and_host_name: &str) -> Option<(String, String)> {
+    let mut iter = user_and_host_name.split('@');
+    let user_name = iter.next()?;
+    let host_name = iter.next()?;
+    Some((user_name.to_string(), host_name.to_string()))
 }
 
 #[async_trait]

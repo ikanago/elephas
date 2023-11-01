@@ -1,6 +1,7 @@
 pub mod ap_person;
 pub mod follow;
 pub mod key_pair;
+pub mod nodeinfo;
 pub mod post;
 pub mod user;
 pub mod user_profile;

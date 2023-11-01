@@ -40,7 +40,11 @@ async fn login_service(
         .await
         .map_err(|_| ServiceError::UserNotFound)?;
     info!(user = ?user);
-    verify_password(&password, &user.password_hash)?;
+    // extract password hash or return error with `let else`
+    let password_hash = user
+        .password_hash
+        .ok_or(ServiceError::WrongCredential)?;
+    verify_password(&password, &password_hash)?;
 
     session.renew();
     info!("Renew the session");

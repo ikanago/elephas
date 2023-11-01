@@ -72,7 +72,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run start:backend',
+    command: 'ENV=dev npm run start:backend',
     url: 'http://localhost:3000/api/ping',
     reuseExistingServer: !process.env.CI,
   },

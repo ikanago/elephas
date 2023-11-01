@@ -57,6 +57,8 @@ async fn main() {
             .service(routing())
             .service(backend::routes::webfinger::webfinger)
             .service(backend::routes::host_meta::host_meta)
+            .service(backend::routes::nodeinfo::nodeinfo_discovery)
+            .service(backend::routes::nodeinfo::nodeinfo)
             .service(Files::new("/assets", "../frontend/dist/assets"))
             .service(
                 web::resource("/{_:.*}")

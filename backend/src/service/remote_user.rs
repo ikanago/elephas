@@ -1,5 +1,6 @@
 use crate::model::{
-    ap_person::ApPersonRepository, user_profile::UserProfile, webfinger::RemoteWebfingerRepository,
+    ap_person::{ApPerson, ApPersonRepository},
+    webfinger::RemoteWebfingerRepository,
 };
 
 pub async fn resolve(
@@ -7,7 +8,7 @@ pub async fn resolve(
     host_name: &str,
     remote_webfinger_repository: impl RemoteWebfingerRepository,
     ap_person_repository: impl ApPersonRepository,
-) -> crate::Result<UserProfile> {
+) -> crate::Result<ApPerson> {
     let webfinger = remote_webfinger_repository
         .fetch_webfinger(&user_name, &host_name)
         .await?;
@@ -21,14 +22,7 @@ pub async fn resolve(
         .ok_or_else(|| crate::error::ServiceError::InternalServerError)?;
 
     let ap_person = ap_person_repository.fetch_ap_person(href.as_str()).await?;
-    let profile = UserProfile {
-        name: ap_person.preferred_username,
-        display_name: ap_person.name.unwrap_or_default(),
-        summary: ap_person.summary.unwrap_or_default(),
-        avatar_url: "".to_string(),
-    };
-
-    Ok(profile)
+    Ok(ap_person)
 }
 
 #[cfg(test)]
@@ -69,10 +63,11 @@ mod tests {
                     preferred_username: "test".to_string(),
                     name: Some("test".to_string()),
                     summary: Some("test".to_string()),
+                    inbox: "https://test.ikanago.dev/users/test/inbox".to_string(),
                 })
             });
 
-        let profile = resolve(
+        let person = resolve(
             "test",
             "test.ikanago.dev",
             mock_remote_webfinger_repository,
@@ -81,12 +76,14 @@ mod tests {
         .await
         .unwrap();
         assert_eq!(
-            profile,
-            UserProfile {
-                name: "test".to_string(),
-                display_name: "test".to_string(),
-                summary: "test".to_string(),
-                avatar_url: "".to_string(),
+            person,
+            ApPerson {
+                id: "https://test.ikanago.dev/users/test".to_string(),
+                r#type: "Person".to_string(),
+                preferred_username: "test".to_string(),
+                name: Some("test".to_string()),
+                summary: Some("test".to_string()),
+                inbox: "https://test.ikanago.dev/users/test/inbox".to_string(),
             }
         )
     }

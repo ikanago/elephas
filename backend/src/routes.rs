@@ -10,10 +10,11 @@ pub mod host_meta;
 mod inbox;
 mod login;
 mod me;
+pub mod nodeinfo;
 mod post;
 mod reset_db;
 mod signup;
-mod users;
+pub mod users;
 pub mod webfinger;
 
 pub fn routing() -> Scope {

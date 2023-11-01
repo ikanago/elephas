@@ -1,7 +1,7 @@
 use serde::Serialize;
 use utoipa::ToSchema;
 
-use crate::model::user::User;
+use crate::model::{ap_person::ApPerson, user::User};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, ToSchema)]
 pub struct UserProfile {
@@ -22,6 +22,17 @@ impl From<User> for UserProfile {
             display_name: user.display_name,
             summary: user.summary,
             avatar_url: user.avatar_url,
+        }
+    }
+}
+
+impl From<ApPerson> for UserProfile {
+    fn from(person: ApPerson) -> Self {
+        Self {
+            name: person.preferred_username,
+            display_name: person.name.unwrap_or_default(),
+            summary: person.summary.unwrap_or_default(),
+            avatar_url: String::new(),
         }
     }
 }

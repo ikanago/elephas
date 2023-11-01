@@ -3,7 +3,7 @@ use reqwest::{header::ACCEPT, Client};
 use serde::Deserialize;
 
 #[allow(unused)]
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ApPerson {
     pub id: String,
@@ -11,6 +11,7 @@ pub struct ApPerson {
     pub preferred_username: String,
     pub name: Option<String>,
     pub summary: Option<String>,
+    pub inbox: String,
 }
 
 #[mockall::automock]

@@ -37,25 +37,29 @@ async fn user_info_activity_json(
     let user = pool.get_user_by_name(&name).await?;
     let key_pair = pool.get_key_pair_by_user_name(user.name).await?;
 
+    let base_url = format!("https://{}/api/users/{}", host_name, name);
     Ok(web::Json(json!({
         "@context": [
             "https://www.w3.org/ns/activitystreams",
             "https://w3id.org/security/v1",
         ],
         "type": "Person",
-        "id": format!("https://{}/users/{}", host_name, name),
-        "inbox": format!("https://{}/users/{}/inbox", host_name, name),
+        // TODO: use immutable ID
+        "id": base_url.clone(),
+        "url": base_url.clone(),
+        "inbox": format!("{}/inbox", base_url),
         "preferredUsername": name,
         "name": name,
+        "discoverable": true,
         "icon": {
             "type": "Image",
             "url": "https://blog.ikanago.dev/_next/image?url=%2Fblog_icon.png&w=828&q=75",
             "name": "",
         },
         "publicKey": {
-            "id": format!("https://{}/users/{}#main-key", host_name, name),
+            "id": format!("{}#main-key", base_url),
             "type": "Key",
-            "owner": format!("https://{}/users/{}", host_name, name),
+            "owner": base_url,
             "publicKeyPem": key_pair.public_key,
         },
     })))

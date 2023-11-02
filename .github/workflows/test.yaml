@@ -50,13 +50,9 @@ jobs:
       - name: Setup Postgresql
         run: psql ${DATABASE_URL} < ./backend/migrations/20230222011102_init.sql
 
-      - name: Build(test)
-        run: cargo test --lib --verbose --release --no-run
-        working-directory: backend
-
       - name: Build and test
         run: |
-          cargo build --locked --verbose --release
+          cargo test --locked --verbose --release --no-run
           cargo test --lib --verbose --release
         working-directory: backend
 
@@ -90,7 +86,7 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
 
-      - name: Run Playwright tests
+      - name: Run E2E tests
         run: |
           make e2e
 

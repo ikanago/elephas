@@ -99,7 +99,7 @@
         }
       }
     },
-    "/followees/{name}": {
+    "/followees/{user_name}": {
       "get": {
         "tags": [
           "self::follow"
@@ -107,7 +107,7 @@
         "operationId": "get_followees_by_user_name",
         "parameters": [
           {
-            "name": "name",
+            "name": "user_name",
             "in": "path",
             "required": true,
             "schema": {
@@ -152,7 +152,7 @@
         }
       }
     },
-    "/followers/{name}": {
+    "/followers/{user_name}": {
       "get": {
         "tags": [
           "self::follow"
@@ -160,7 +160,7 @@
         "operationId": "get_followers_by_user_name",
         "parameters": [
           {
-            "name": "name",
+            "name": "user_name",
             "in": "path",
             "required": true,
             "schema": {
@@ -446,7 +446,7 @@
         }
       }
     },
-    "/users/{name}": {
+    "/users/{user_name}": {
       "get": {
         "tags": [
           "self::users"
@@ -454,7 +454,7 @@
         "operationId": "user_profile",
         "parameters": [
           {
-            "name": "name",
+            "name": "user_name",
             "in": "path",
             "required": true,
             "schema": {

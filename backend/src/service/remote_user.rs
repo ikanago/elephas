@@ -1,13 +1,18 @@
+use sqlx::PgPool;
+
 use crate::model::{
-    ap_person::ApPersonRepository, user_profile::UserProfile, webfinger::RemoteWebfingerRepository,
+    activitypub::{ActivityPubRequestRepository, Person},
+    user_profile::UserProfile,
+    webfinger::RemoteWebfingerRepository,
+    UserRepository,
 };
 
 pub async fn resolve(
     user_name: &str,
     host_name: &str,
-    remote_webfinger_repository: impl RemoteWebfingerRepository,
-    ap_person_repository: impl ApPersonRepository,
-) -> crate::Result<UserProfile> {
+    remote_webfinger_repository: &impl RemoteWebfingerRepository,
+    activitypub_request_repository: &impl ActivityPubRequestRepository,
+) -> crate::Result<Person> {
     let webfinger = remote_webfinger_repository
         .fetch_webfinger(&user_name, &host_name)
         .await?;
@@ -20,21 +25,41 @@ pub async fn resolve(
         .clone()
         .ok_or_else(|| crate::error::ServiceError::InternalServerError)?;
 
-    let ap_person = ap_person_repository.fetch_ap_person(href.as_str()).await?;
-    let profile = UserProfile {
-        name: ap_person.preferred_username,
-        display_name: ap_person.name.unwrap_or_default(),
-        summary: ap_person.summary.unwrap_or_default(),
-        avatar_url: "".to_string(),
-    };
+    let ap_person = activitypub_request_repository
+        .get::<Person>(href.as_str())
+        .await?;
+    Ok(ap_person)
+}
 
-    Ok(profile)
+pub async fn create_remote_user(
+    pool: &PgPool,
+    user_name: &str,
+    host_name: &str,
+) -> crate::Result<()> {
+    let person = crate::service::remote_user::resolve(
+        user_name,
+        host_name,
+        &crate::model::webfinger::RemoteWebfingerRepositoryImpl,
+        &crate::model::activitypub::ActivityPubRequestRepositoryImpl,
+    )
+    .await?;
+    let user_profile: UserProfile = person.into();
+    let user = crate::model::user::User {
+        // TODO: use ID
+        name: user_profile.name.clone(),
+        display_name: user_profile.display_name.clone(),
+        summary: user_profile.summary.clone(),
+        avatar_url: user_profile.avatar_url.clone(),
+        ..Default::default()
+    };
+    pool.save_user(user).await?;
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use crate::model::{
-        ap_person::{ApPerson, MockApPersonRepository},
+        activitypub::{MockActivityPubRequestRepository, Person},
         webfinger::{MockRemoteWebfingerRepository, Webfinger, WebfingerLink},
     };
 
@@ -58,35 +83,38 @@ mod tests {
                 })
             });
 
-        let mut mock_ap_person_repository = MockApPersonRepository::new();
-        mock_ap_person_repository
-            .expect_fetch_ap_person()
+        let mut mock_activitypub_request_repository = MockActivityPubRequestRepository::new();
+        mock_activitypub_request_repository
+            .expect_get()
             .with(eq("https://test.ikanago.dev/users/test"))
             .returning(|_| {
-                Ok(ApPerson {
+                Ok(Person {
                     id: "https://test.ikanago.dev/users/test".to_string(),
                     r#type: "Person".to_string(),
                     preferred_username: "test".to_string(),
                     name: Some("test".to_string()),
                     summary: Some("test".to_string()),
+                    inbox: "https://test.ikanago.dev/users/test/inbox".to_string(),
                 })
             });
 
-        let profile = resolve(
+        let person = resolve(
             "test",
             "test.ikanago.dev",
-            mock_remote_webfinger_repository,
-            mock_ap_person_repository,
+            &mock_remote_webfinger_repository,
+            &mock_activitypub_request_repository,
         )
         .await
         .unwrap();
         assert_eq!(
-            profile,
-            UserProfile {
-                name: "test".to_string(),
-                display_name: "test".to_string(),
-                summary: "test".to_string(),
-                avatar_url: "".to_string(),
+            person,
+            Person {
+                id: "https://test.ikanago.dev/users/test".to_string(),
+                r#type: "Person".to_string(),
+                preferred_username: "test".to_string(),
+                name: Some("test".to_string()),
+                summary: Some("test".to_string()),
+                inbox: "https://test.ikanago.dev/users/test/inbox".to_string(),
             }
         )
     }

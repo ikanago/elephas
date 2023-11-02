@@ -1,19 +1,22 @@
 use actix_session::Session;
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use sqlx::PgPool;
-use tracing::debug;
 
 use crate::{
     error::ServiceError,
     model::{
+        activitypub::ActivityPubRequestRepositoryImpl,
         follow::{Follow, FollowRepository},
-        user::UserRepository,
+        user::{parse_user_and_host_name, UserRepository},
         user_profile::UserProfile,
+        webfinger::RemoteWebfingerRepositoryImpl,
     },
     SESSION_KEY,
 };
 
 #[utoipa::path(
+    post,
+    path = "/follow",
     request_body = Follow,
     responses(
         (status = 204, description = "Successfully follow the user"),
@@ -21,11 +24,11 @@ use crate::{
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[post("/follow")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn create_follow(
     pool: web::Data<PgPool>,
     body: web::Json<Follow>,
+    host_name: web::Data<String>,
     session: Session,
 ) -> crate::Result<impl Responder> {
     let user_name = session
@@ -41,21 +44,49 @@ pub async fn create_follow(
         return Err(ServiceError::WrongCredential);
     }
 
+    let (follow_to_username, follow_to_host_name) = parse_user_and_host_name(&follow_to_name)
+        .unwrap_or((follow_to_name.clone(), String::new()));
+    let is_follow_to_remote = !follow_to_host_name.is_empty();
     if pool.get_user_by_name(&follow_to_name).await.is_err() {
-        return Err(ServiceError::UserNotFound);
+        if is_follow_to_remote {
+            crate::service::remote_user::create_remote_user(
+                &pool,
+                &follow_to_username,
+                &follow_to_host_name,
+            )
+            .await?;
+        } else {
+            return Err(ServiceError::UserNotFound);
+        }
     }
 
     // TODO: check if the user is already followed
 
     let follow = Follow {
-        follow_from_name,
-        follow_to_name,
+        follow_from_name: follow_from_name.clone(),
+        follow_to_name: follow_to_username.clone(),
     };
     pool.save_follow(follow).await?;
+
+    if is_follow_to_remote {
+        crate::service::activitypub::follow_remote_person(
+            &pool,
+            &host_name,
+            &follow_from_name,
+            &follow_to_username,
+            &follow_to_host_name,
+            &ActivityPubRequestRepositoryImpl,
+            &RemoteWebfingerRepositoryImpl,
+        )
+        .await?;
+    }
+
     Ok(HttpResponse::NoContent().finish())
 }
 
 #[utoipa::path(
+    delete,
+    path = "/follow",
     request_body = Follow,
     responses(
         (status = 204, description = "Successfully remove the user"),
@@ -63,7 +94,6 @@ pub async fn create_follow(
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[delete("/follow")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn delete_follow(
     pool: web::Data<PgPool>,
@@ -84,13 +114,14 @@ pub async fn delete_follow(
 }
 
 #[utoipa::path(
+    get,
+    path = "/followees/{user_name}",
     responses(
         (status = 200, body = Vec<UserProfile>, description = "Successfully get followees for a user"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[get("/followees/{name}")]
 #[tracing::instrument(skip(pool))]
 pub async fn get_followees_by_user_name(
     pool: web::Data<PgPool>,
@@ -102,18 +133,18 @@ pub async fn get_followees_by_user_name(
         .into_iter()
         .map(|user| UserProfile::from(user))
         .collect::<Vec<_>>();
-    debug!(folloees = ?folloees);
     Ok(HttpResponse::Ok().json(folloees))
 }
 
 #[utoipa::path(
+    get,
+    path = "/followers/{user_name}",
     responses(
         (status = 200, body = Vec<UserProfile>, description = "Successfully get followers for a user"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[get("/followers/{name}")]
 #[tracing::instrument(skip(pool))]
 pub async fn get_followers_by_user_name(
     pool: web::Data<PgPool>,
@@ -125,6 +156,5 @@ pub async fn get_followers_by_user_name(
         .into_iter()
         .map(|user| UserProfile::from(user))
         .collect::<Vec<_>>();
-    debug!(folloers = ?folloers);
     Ok(HttpResponse::Ok().json(folloers))
 }

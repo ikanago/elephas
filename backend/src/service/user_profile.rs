@@ -5,8 +5,8 @@ use utoipa::ToSchema;
 
 use crate::{
     model::{
-        ap_person::ApPersonRepositoryImpl,
-        user::{User, UserRepository},
+        activitypub::ActivityPubRequestRepositoryImpl,
+        user::{parse_user_and_host_name, User, UserRepository},
         user_profile::UserProfile,
         webfinger::RemoteWebfingerRepositoryImpl,
     },
@@ -19,13 +19,14 @@ pub async fn get_user_profile_service(
 ) -> crate::Result<UserProfile> {
     info!(user_name);
     if let Some((user_name, host_name)) = parse_user_and_host_name(user_name) {
-        let user_profile = remote_user::resolve(
+        let person = remote_user::resolve(
             &user_name,
             &host_name,
-            RemoteWebfingerRepositoryImpl,
-            ApPersonRepositoryImpl,
+            &RemoteWebfingerRepositoryImpl,
+            &ActivityPubRequestRepositoryImpl,
         )
         .await?;
+        let user_profile = person.into();
         info!(user = ?user_profile);
         return Ok(user_profile);
     }
@@ -35,14 +36,6 @@ pub async fn get_user_profile_service(
     info!(user = ?user_profile);
     Ok(user_profile)
 }
-
-fn parse_user_and_host_name(user_and_host_name: &str) -> Option<(String, String)> {
-    let mut iter = user_and_host_name.split('@');
-    let user_name = iter.next()?;
-    let host_name = iter.next()?;
-    Some((user_name.to_string(), host_name.to_string()))
-}
-
 #[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct UserProfileUpdate {
     pub display_name: String,
@@ -53,6 +46,7 @@ pub struct UserProfileUpdate {
 pub async fn update_user_profile_service(
     pool: &PgPool,
     user_name: &str,
+    // TODO: use UserProfile here
     user_profile: UserProfileUpdate,
 ) -> crate::Result<()> {
     let user = pool.get_user_by_name(&user_name).await?;

@@ -36,7 +36,6 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: backend
 
     steps:
       - uses: actions/checkout@v4
@@ -49,15 +48,13 @@ jobs:
           workspaces: backend -> target
 
       - name: Setup Postgresql
-        run: psql ${DATABASE_URL} < ./migrations/20230222011102_init.sql
-
-      - name: Build(test)
-        run: cargo test --lib --verbose --release --no-run
+        run: psql ${DATABASE_URL} < ./backend/migrations/20230222011102_init.sql
 
       - name: Build and test
         run: |
-          cargo build --locked --verbose --release
+          cargo test --locked --verbose --release --no-run
           cargo test --lib --verbose --release
+        working-directory: backend
 
       - name: Cache frontend dependencies
         if: github.actor != 'renovate[bot]'
@@ -78,22 +75,20 @@ jobs:
 
       - name: Check OpenAPI Spec is up to date
         run: |
-          npm run schema
+          make schema
           # Just check schema.json, not schema.ts; schema.ts can be differed by formatter even it is up to date.
-          diff=$(git diff -- ../schema.json)
+          diff=$(git diff -- schema.json)
           echo -n "$diff"
           # Without `-n`, `echo -n "$diff" | wc -l` is 1 even if `"$diff" is empty.`
           test $(echo -n "$diff" | wc -l) -eq 0
-        working-directory: frontend
 
       - name: Install Playwright dependencies
         run: |
           npx playwright install --with-deps chromium
 
-      - name: Run Playwright tests
+      - name: Run E2E tests
         run: |
-          npm run e2e
-        working-directory: frontend
+          make e2e
 
       - uses: actions/upload-artifact@v3
         if: always()

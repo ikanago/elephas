@@ -12,26 +12,26 @@ export const useMe = () => {
   return data;
 };
 
-export const useUser = (name: string) => {
+export const useUser = (user_name: string) => {
   const { data } = useSWR(
-    ["/api/users/{name}", name],
-    async ([_, name]) => await getUserProfile({ name }),
+    ["/api/users/{user_name}", user_name],
+    async ([_, user_name]) => await getUserProfile({ user_name }),
   );
   return data;
 };
 
-export const useFollowees = (name: string) => {
+export const useFollowees = (user_name: string) => {
   const { data, mutate } = useSWR(
-    name !== "" ? ["/api/followees/{name}", name] : undefined,
-    async ([_, name]) => await getFollowees({ name }),
+    user_name !== "" ? ["/api/followees/{user_name}", user_name] : undefined,
+    async ([_, user_name]) => await getFollowees({ user_name }),
   );
   return { res: data, mutate };
 };
 
-export const useFollers = (name: string) => {
+export const useFollers = (user_name: string) => {
   const { data, mutate } = useSWR(
-    name !== "" ? ["/api/followers/{name}", name] : undefined,
-    async ([_, name]) => await getFollowers({ name }),
+    user_name !== "" ? ["/api/followers/{user_name}", user_name] : undefined,
+    async ([_, user_name]) => await getFollowers({ user_name }),
   );
   return { res: data, mutate };
 };

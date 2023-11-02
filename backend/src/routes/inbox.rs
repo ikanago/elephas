@@ -1,5 +1,5 @@
 use crate::model::{key_pair::sign_headers, KeyPairRepository, UserRepository};
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
 use serde_json::json;
 use sqlx::PgPool;
@@ -12,8 +12,7 @@ pub struct InboxBody {
     object: String,
 }
 
-#[post("/users/{name}/inbox")]
-async fn inbox(
+pub async fn inbox(
     pool: web::Data<PgPool>,
     host_name: web::Data<String>,
     param: web::Path<String>,
@@ -47,7 +46,7 @@ async fn inbox_service(
         // TODO: assuming remote inbox URL.
         let target_inbox = format!("{}/inbox", body.actor);
 
-        let key_pair = pool.get_key_pair_by_user_name(user.name).await?;
+        let key_pair = pool.get_key_pair_by_user_name(&user.name).await?;
         let headers = sign_headers(&payload, &target_inbox, &key_pair.private_key)?;
 
         let client = reqwest::Client::new();

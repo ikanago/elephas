@@ -7,33 +7,6 @@ const api =
     ? "http://localhost:5173/api"
     : "https://elephas-dev.ikanago.dev/api";
 
-type O = {
-  readonly requestBody: {
-    readonly content: {
-      readonly "application/json": "";
-    };
-  };
-  responses: {
-    /** @description Successfully created a post */
-    204: {
-      content: never;
-    };
-    /** @description Unauthorized */
-    401: {
-      content: {
-        readonly "application/json": "";
-      };
-    };
-    /** @description InternalServerError */
-    500: {
-      content: {
-        readonly "application/json": "";
-      };
-    };
-  };
-};
-
-// To get type { status: 204; data: never } | { status: 401; data: { message: string } } | { status: 500; data: { message: string } }, refine above ResponseOperation<Op> to:
 type ResponseOperation<Op> = Op extends { responses: infer Statuses }
   ? {
       [K in keyof Statuses]: Statuses[K] extends { content: infer Content }
@@ -170,12 +143,12 @@ export const createPost = apiPost("/posts");
 
 export const getPostsOfMe = apiGet("/posts");
 
-export const getUserProfile = apiGet("/users/{name}");
+export const getUserProfile = apiGet("/users/{user_name}");
 
 export const createFollow = apiPost("/follow");
 
 export const deleteFollow = apiDelete("/follow");
 
-export const getFollowees = apiGet("/followees/{name}");
+export const getFollowees = apiGet("/followees/{user_name}");
 
-export const getFollowers = apiGet("/followers/{name}");
+export const getFollowers = apiGet("/followers/{user_name}");

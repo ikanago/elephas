@@ -9,7 +9,8 @@ import {
 
 const UserProfile = () => {
   const { name } = useParams();
-  const user = useUser(name ?? "");
+  const name2 = name ?? "";
+  const user = useUser(name2);
   let userName = "";
   if (user?.status === 200) {
     userName = user.data.name;
@@ -29,7 +30,7 @@ const UserProfile = () => {
     if (user?.status !== 200 || me?.status !== 200) return;
     await createFollow({
       follow_from_name: me.data.name,
-      follow_to_name: userName,
+      follow_to_name: name2,
     });
     await mutateFollowees();
     await mutateFollowers();
@@ -39,7 +40,7 @@ const UserProfile = () => {
     if (user?.status !== 200 || me?.status !== 200) return;
     await deleteFollow({
       follow_from_name: me.data.name,
-      follow_to_name: userName,
+      follow_to_name: name2,
     });
     await mutateFollowees();
     await mutateFollowers();

@@ -1,5 +1,5 @@
 use actix_session::Session;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use serde_json::json;
 use sqlx::PgPool;
 
@@ -12,13 +12,14 @@ use crate::{
 };
 
 #[utoipa::path(
+    get,
+    path = "/me",
     responses(
         (status = 200, body = UserProfile, description = "Successfully fetched user info"),
         (status = 401, body = ErrorMessage, description = "Unauthorized"),
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[get("/me")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn me(pool: web::Data<PgPool>, session: Session) -> crate::Result<impl Responder> {
     // TODO: extract session validation
@@ -31,6 +32,8 @@ pub async fn me(pool: web::Data<PgPool>, session: Session) -> crate::Result<impl
 }
 
 #[utoipa::path(
+    post,
+    path = "/me",
     request_body = UserProfileUpdate,
     responses(
         (status = 204, description = "Successfully update user profile"),
@@ -38,7 +41,6 @@ pub async fn me(pool: web::Data<PgPool>, session: Session) -> crate::Result<impl
         (status = 500, body = ErrorMessage, description = "InternalServerError"),
     )
 )]
-#[post("/me")]
 #[tracing::instrument(skip(pool, session))]
 pub async fn update_me(
     pool: web::Data<PgPool>,

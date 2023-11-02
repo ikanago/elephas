@@ -29,10 +29,7 @@ pub fn route(config: &mut web::ServiceConfig) {
                 web::get().to(self::users::user_profile),
             )
             .route("/posts", web::post().to(self::post::create_post))
-            .route(
-                "/posts",
-                web::get().to(self::post::get_posts_by_user_name),
-            )
+            .route("/posts", web::get().to(self::post::get_posts_by_user_name))
             .route("/follow", web::post().to(self::follow::create_follow))
             .route("/follow", web::delete().to(self::follow::delete_follow))
             .route(

@@ -9,9 +9,7 @@
     "check": "biome check ./src/",
     "dev": "vite",
     "e2e": "npm run build:test && playwright test",
-    "fix": "biome check --apply ./src/",
-    "schema": "cargo run --manifest-path=../backend/Cargo.toml --bin gen_schema --release -- ../schema.json && openapi-typescript ../schema.json --output src/schema.ts --immutable-types",
-    "start:backend": "cargo run --manifest-path=../backend/Cargo.toml --bin app --release",
+    "format": "biome check --apply ./src/",
     "start:mock": "docker run -p 3000:8000 --rm --mount type=bind,src=`pwd`/../schema.json,dst=/schema.json danielgtaylor/apisprout --validate-server /schema.json",
     "reset-db": "pushd ../backend && sqlx database drop -y && sqlx database create && sqlx migrate run && popd"
   },

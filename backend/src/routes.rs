@@ -42,7 +42,7 @@ pub fn route(config: &mut web::ServiceConfig) {
             )
             .route(
                 "/users/{user_name}/inbox",
-                web::get().to(self::inbox::inbox),
+                web::post().to(self::inbox::inbox),
             )
             .route("/ping", web::get().to(ping))
             .route("/reset-db", web::delete().to(self::reset_db::reset_db)),

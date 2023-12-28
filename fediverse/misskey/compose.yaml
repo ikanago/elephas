@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   misskey:
-    image: "misskey/misskey:13.14.2"
+    image: "misskey/misskey:2023.12.2"
     restart: always
     platform: linux/x86_64
     depends_on:

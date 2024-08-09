@@ -20,7 +20,7 @@ jobs:
         ports:
           - 6379:6379
       postgres:
-        image: 'postgres:16.0'
+        image: 'postgres:16.4'
         env:
           POSTGRES_DB: test
           POSTGRES_USER: ikanago

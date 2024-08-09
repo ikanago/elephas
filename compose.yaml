@@ -7,7 +7,7 @@ services:
       - 6379:6379
 
   db:
-    image: postgres:16.0
+    image: postgres:16.4
     env_file:
       - ./backend/.env
     volumes:

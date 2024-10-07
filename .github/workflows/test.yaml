@@ -16,7 +16,7 @@ jobs:
     runs-on: 'ubuntu-22.04'
     services:
       redis:
-        image: 'redis:7.2.1'
+        image: 'redis:7.4.1'
         ports:
           - 6379:6379
       postgres:
